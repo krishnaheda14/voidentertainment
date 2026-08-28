@@ -10,7 +10,9 @@
     "preview": "vite preview --port 4173",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=void-entertainment",
     "cf:login": "wrangler login",
-    "cf:tail": "wrangler pages deployment tail --project-name=void-entertainment"
+    "cf:tail": "wrangler pages deployment tail --project-name=void-entertainment",
+    "deploy:vercel": "npx vercel --prod",
+    "vercel:login": "npx vercel login"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",
