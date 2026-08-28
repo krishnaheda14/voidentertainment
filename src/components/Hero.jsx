@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowDown, MapPin, MessageCircle } from 'lucide-react'
 import { brand, week, venues } from '../data/site'
+import logo from '../data/logo-mark.png'
 import {
   nightlifeDay,
   scrollToId,
@@ -210,6 +211,16 @@ export default function Hero({ ready }) {
 
         <motion.div style={reduce ? {} : { y, opacity: fade }} className="relative z-10">
           <div className="shell pb-10 sm:pb-14">
+            {/* mark */}
+            <motion.img
+              src={logo}
+              alt="Void Entertainment"
+              initial={{ opacity: 0, y: 14 }}
+              animate={ready ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.05, duration: 0.7 }}
+              className="mb-6 h-16 w-auto sm:h-20"
+            />
+
             {/* eyebrow row — real data, not decoration */}
             <motion.div
               initial={{ opacity: 0 }}

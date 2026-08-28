@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, X, MessageCircle, Instagram } from 'lucide-react'
 import { brand } from '../data/site'
-import logo from '../data/logo.jpg'
+import logo from '../data/logo-mark.png'
 import { waLink, scrollToId, cx, useMediaQuery } from '../lib/utils'
 import { VoidButton } from './ui'
 
@@ -211,7 +211,7 @@ export function Nav() {
             className="group flex items-center gap-2.5"
             aria-label="Void Entertainment — back to top"
           >
-            <img src={logo} alt="Void Entertainment" className="h-9 w-auto sm:h-11" />
+            <img src={logo} alt="Void Entertainment" className="h-10 w-auto sm:h-12" />
             <span className="hidden font-mono text-[9px] uppercase tracking-widest2 text-silver-lo sm:block">
               Bombay
             </span>
@@ -262,7 +262,7 @@ export function Nav() {
             transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
           >
             <div className="shell flex h-16 items-center justify-between sm:h-[72px]">
-              <img src={logo} alt="Void Entertainment" className="h-9 w-auto" />
+              <img src={logo} alt="Void Entertainment" className="h-10 w-auto" />
               <button
                 onClick={() => setOpen(false)}
                 className="grid h-10 w-10 place-items-center border border-silver/15 text-silver"
