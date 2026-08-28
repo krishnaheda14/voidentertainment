@@ -1,0 +1,7 @@
+# Wrangler config for Cloudflare Pages (direct upload / CLI deploys).
+# Only needed if you deploy with `npm run deploy`. Git-connected deploys
+# configure everything in the Cloudflare dashboard instead.
+
+name = "void-entertainment"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "dist"

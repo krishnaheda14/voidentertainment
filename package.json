@@ -1,0 +1,34 @@
+{
+  "name": "void-entertainment",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Void Entertainment — nightlife access, guestlists and table bookings across Bombay.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=void-entertainment",
+    "cf:login": "wrangler login",
+    "cf:tail": "wrangler pages deployment tail --project-name=void-entertainment"
+  },
+  "dependencies": {
+    "framer-motion": "^11.11.17",
+    "lenis": "^1.1.18",
+    "lucide-react": "^0.462.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "terser": "^5.36.0",
+    "vite": "^5.4.11",
+    "wrangler": "^3.90.0"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   TOKENS
+   ========================================================================== */
+:root {
+  --void-000: #050506;
+  --void-100: #0c0c0f;
+  --void-200: #141419;
+  --void-300: #1e1e25;
+
+  --silver-hi: #f4f6f8;
+  --silver: #bcc3cb;
+  --silver-lo: #5a616b;
+
+  --flare: #ff5a00;
+  --flare-hot: #ff8a3d;
+  --flare-deep: #b32e00;
+
+  /* pointer light-leak position, written by App.jsx */
+  --lx: 50%;
+  --ly: 30%;
+
+  --rail: 1px;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scrollbar-color: var(--flare-deep) var(--void-000);
+  }
+
+  body {
+    @apply bg-void-000 font-sans text-silver antialiased;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--flare);
+    color: #050506;
+  }
+
+  /* Keyboard focus stays visible everywhere. Non-negotiable. */
+  :focus-visible {
+    outline: 2px solid var(--flare);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3 {
+    @apply font-display font-normal uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.85;
+  }
+}
+
+/* ==========================================================================
+   SIGNATURE: brushed-metal silver type
+   Not flat grey — a real specular band running through the letterforms.
+   ========================================================================== */
+.metal {
+  background-image: linear-gradient(
+    174deg,
+    #6e757e 0%,
+    #aeb6bf 18%,
+    #ffffff 34%,
+    #d3dae1 42%,
+    #7d848d 55%,
+    #f4f6f8 70%,
+    #9aa2ab 84%,
+    #5a616b 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.metal-flare {
+  background-image: linear-gradient(
+    172deg,
+    #7d848d 0%,
+    #e8ecf0 22%,
+    #ffffff 33%,
+    var(--flare-hot) 48%,
+    var(--flare) 58%,
+    #cdd4db 74%,
+    #6e757e 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   ATMOSPHERE
+   ========================================================================== */
+
+/* Film grain — one tiny inline SVG, no image request */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift 0.6s steps(3) infinite;
+}
+
+@keyframes grainShift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2%, 1%); }
+  66% { transform: translate(1%, -2%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Pointer light-leak — the orange bleeds toward wherever you are */
+.leak::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    46rem 46rem at var(--lx) var(--ly),
+    rgba(255, 90, 0, 0.13),
+    rgba(255, 90, 0, 0.035) 38%,
+    transparent 68%
+  );
+  transition: background 220ms linear;
+}
+
+/* Hairline rules used as structural dividers */
+.rule {
+  height: var(--rail);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(188, 195, 203, 0.22) 12%,
+    rgba(188, 195, 203, 0.22) 88%,
+    transparent
+  );
+}
+
+.rule-flare {
+  height: var(--rail);
+  background: linear-gradient(90deg, transparent, var(--flare) 50%, transparent);
+  opacity: 0.6;
+}
+
+/* Panel surface with a lit top edge, like a backlit sign */
+.panel {
+  background: linear-gradient(180deg, var(--void-200), var(--void-100));
+  border: 1px solid rgba(188, 195, 203, 0.09);
+  position: relative;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(244, 246, 248, 0.32),
+    transparent
+  );
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+.eyebrow {
+  @apply font-mono text-[10px] uppercase tracking-widest2 text-silver-lo;
+}
+
+.shell {
+  @apply mx-auto w-full max-w-[1400px] px-5 sm:px-8 lg:px-12;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.edge-fade {
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+/* Marquee track: children are duplicated once, so -50% loops seamlessly */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.hover-pause:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   REDUCED MOTION — everything ambient stops, nothing disappears
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .grain::after { animation: none; }
+  .marquee-track { animation: none !important; transform: none !important; }
+}

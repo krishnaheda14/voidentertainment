@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050506" />
+    <meta name="color-scheme" content="dark" />
+
+    <title>Void Entertainment — Nightlife access in Bombay</title>
+    <meta
+      name="description"
+      content="Guestlists, table bookings and stag entry across MERCII, Bağlami, Onrique, OPA Kipos and Bastian Beach Club. One WhatsApp, name at the door, best price in the city."
+    />
+    <link rel="canonical" href="https://voidentertainment.in/" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Void Entertainment" />
+    <meta property="og:title" content="Void Entertainment — Nightlife access in Bombay" />
+    <meta
+      property="og:description"
+      content="Five rooms. Seven nights. One number. Guestlists and tables across Bombay, priced properly."
+    />
+    <meta property="og:url" content="https://voidentertainment.in/" />
+    <meta property="og:image" content="https://voidentertainment.in/og.jpg" />
+    <meta property="og:locale" content="en_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Void Entertainment — Nightlife access in Bombay" />
+    <meta
+      name="twitter:description"
+      content="Five rooms. Seven nights. One number."
+    />
+    <meta name="twitter:image" content="https://voidentertainment.in/og.jpg" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Fonts: Anton (display) / Space Grotesk (body) / JetBrains Mono (data) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EntertainmentBusiness",
+        "name": "Void Entertainment",
+        "description": "Nightlife access, guestlists and table bookings across Bombay's premium venues.",
+        "url": "https://voidentertainment.in/",
+        "areaServed": { "@type": "City", "name": "Mumbai" },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Mumbai",
+          "addressRegion": "Maharashtra",
+          "addressCountry": "IN"
+        },
+        "openingHours": "Mo-Su 11:00-04:00",
+        "priceRange": "₹₹₹"
+      }
+    </script>
+
+    <style>
+      /* Paint the void before React boots so there is never a white flash */
+      html { background: #050506; }
+      body { margin: 0; background: #050506; color: #bcc3cb; }
+      #boot {
+        position: fixed; inset: 0; display: grid; place-items: center;
+        background: #050506; z-index: 9999;
+      }
+      #boot span {
+        font-family: Anton, Impact, sans-serif; letter-spacing: .5em;
+        font-size: 14px; color: #FF5A00; text-indent: .5em;
+        animation: bootPulse 1.4s ease-in-out infinite;
+      }
+      @keyframes bootPulse { 0%,100% { opacity:.25 } 50% { opacity:1 } }
+    </style>
+  </head>
+  <body>
+    <div id="boot"><span>VOID</span></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
