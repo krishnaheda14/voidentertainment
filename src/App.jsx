@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 
-import { Cursor, Nav, Preloader, WhatsAppFab } from './components/Chrome'
+import { Cursor, Nav, Preloader, Sparkles, WhatsAppFab } from './components/Chrome'
 import Hero from './components/Hero'
 import Schedule from './components/Schedule'
 import Venues from './components/Venues'
@@ -48,6 +48,7 @@ export default function App() {
         {loading && <Preloader key="preloader" onDone={done} />}
       </AnimatePresence>
 
+      <Sparkles />
       <Cursor />
       <Nav />
 

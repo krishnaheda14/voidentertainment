@@ -16,8 +16,8 @@ export const brand = {
   tagline: 'Nightlife access, handled.',
 
   // ---- CHANGE THIS ----------------------------------------------------
-  whatsapp: '919999999999', // owner's WhatsApp, digits only, with country code
-  whatsappLabel: '+91 99999 99999', // what gets shown on screen
+  whatsapp: '919420169352', // owner's WhatsApp, digits only, with country code
+  whatsappLabel: '+91 94201 69352', // what gets shown on screen
   // ---------------------------------------------------------------------
 
   email: 'book@voidentertainment.in',

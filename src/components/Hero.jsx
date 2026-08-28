@@ -15,7 +15,27 @@ import { VoidButton, StatusDot } from './ui'
 
 /* ==========================================================================
    EMBERS — ambient canvas. Cheap, capped, and it stops dead on reduced motion.
+   A cut of the particles are glitter — small four-point stars that twinkle
+   in place — mixed in with the rising embers for the club-floor feel.
    ========================================================================== */
+function drawSparkle(ctx, x, y, s, a, rgb) {
+  ctx.save()
+  ctx.globalAlpha = a
+  ctx.fillStyle = `rgb(${rgb})`
+  ctx.beginPath()
+  ctx.moveTo(x, y - s * 2.4)
+  ctx.lineTo(x + s * 0.55, y - s * 0.55)
+  ctx.lineTo(x + s * 2.4, y)
+  ctx.lineTo(x + s * 0.55, y + s * 0.55)
+  ctx.lineTo(x, y + s * 2.4)
+  ctx.lineTo(x - s * 0.55, y + s * 0.55)
+  ctx.lineTo(x - s * 2.4, y)
+  ctx.lineTo(x - s * 0.55, y - s * 0.55)
+  ctx.closePath()
+  ctx.fill()
+  ctx.restore()
+}
+
 function Embers() {
   const ref = useRef(null)
   const reduce = useReducedMotion()
@@ -40,18 +60,26 @@ function Embers() {
     resize()
     window.addEventListener('resize', resize)
 
-    const count = window.innerWidth < 768 ? 26 : 54
-    const parts = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 1.7 + 0.4,
-      vy: -(Math.random() * 0.36 + 0.09),
-      vx: (Math.random() - 0.5) * 0.16,
-      a: Math.random() * 0.5 + 0.12,
-      hot: Math.random() > 0.55,
-    }))
+    const count = window.innerWidth < 768 ? 30 : 62
+    const parts = Array.from({ length: count }, () => {
+      const spark = Math.random() > 0.68
+      return {
+        spark,
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: spark ? Math.random() * 1.2 + 0.8 : Math.random() * 1.7 + 0.4,
+        vy: spark ? -(Math.random() * 0.1 + 0.02) : -(Math.random() * 0.36 + 0.09),
+        vx: (Math.random() - 0.5) * (spark ? 0.05 : 0.16),
+        a: Math.random() * 0.5 + 0.12,
+        hot: Math.random() > 0.55,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.8 + 0.5,
+      }
+    })
 
+    let t = 0
     const draw = () => {
+      t += 0.016
       ctx.clearRect(0, 0, w, h)
       for (const p of parts) {
         p.y += p.vy
@@ -60,12 +88,20 @@ function Embers() {
           p.y = h + 10
           p.x = Math.random() * w
         }
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = p.hot
-          ? `rgba(255,138,61,${p.a})`
-          : `rgba(188,195,203,${p.a * 0.55})`
-        ctx.fill()
+        if (p.spark) {
+          const twinkle = (Math.sin(t * p.speed + p.phase) + 1) / 2
+          const a = p.a * twinkle * twinkle
+          if (a > 0.02) {
+            drawSparkle(ctx, p.x, p.y, p.r + twinkle * 1.5, a, p.hot ? '255,138,61' : '244,246,248')
+          }
+        } else {
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+          ctx.fillStyle = p.hot
+            ? `rgba(255,138,61,${p.a})`
+            : `rgba(188,195,203,${p.a * 0.55})`
+          ctx.fill()
+        }
       }
       raf = requestAnimationFrame(draw)
     }
@@ -209,18 +245,18 @@ export default function Hero({ ready }) {
           aria-hidden
         />
 
+        {/* mark — parked in the empty right-hand space beside the wordmark */}
+        <motion.img
+          src={logo}
+          alt="Void Entertainment"
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={ready ? { opacity: 0.95, scale: 1 } : {}}
+          transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="pointer-events-none absolute right-8 top-1/2 z-[5] hidden h-64 w-auto -translate-y-1/2 drop-shadow-[0_0_70px_rgba(255,90,0,.28)] xl:block 2xl:right-20 2xl:h-80"
+        />
+
         <motion.div style={reduce ? {} : { y, opacity: fade }} className="relative z-10">
           <div className="shell pb-10 sm:pb-14">
-            {/* mark */}
-            <motion.img
-              src={logo}
-              alt="Void Entertainment"
-              initial={{ opacity: 0, y: 14 }}
-              animate={ready ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.05, duration: 0.7 }}
-              className="mb-6 h-16 w-auto sm:h-20"
-            />
-
             {/* eyebrow row — real data, not decoration */}
             <motion.div
               initial={{ opacity: 0 }}

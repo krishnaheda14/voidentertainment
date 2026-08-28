@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, X, MessageCircle, Instagram } from 'lucide-react'
 import { brand } from '../data/site'
@@ -114,6 +114,89 @@ export function Preloader({ onDone }) {
         </div>
       </motion.div>
     </motion.div>
+  )
+}
+
+/* ==========================================================================
+   SPARKLES — glitter dust fixed to the viewport for the whole scroll, not
+   just the hero. Same restraint as .grain: barely-there, capped, and it
+   stops dead on reduced motion.
+   ========================================================================== */
+export function Sparkles() {
+  const ref = useRef(null)
+  const reduce = useReducedMotion()
+
+  useEffect(() => {
+    if (reduce) return
+    const cv = ref.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    let raf
+    let w = 0
+    let h = 0
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+
+    const resize = () => {
+      w = window.innerWidth
+      h = window.innerHeight
+      cv.width = w * dpr
+      cv.height = h * dpr
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const count = window.innerWidth < 768 ? 16 : 30
+    const parts = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.1 + 0.6,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.5 + 0.35,
+      hot: Math.random() > 0.75,
+    }))
+
+    let t = 0
+    const draw = () => {
+      t += 0.016
+      ctx.clearRect(0, 0, w, h)
+      for (const p of parts) {
+        const twinkle = (Math.sin(t * p.speed + p.phase) + 1) / 2
+        const a = twinkle * twinkle * 0.4
+        if (a < 0.02) continue
+        const s = p.r + twinkle * 1.1
+        ctx.save()
+        ctx.globalAlpha = a
+        ctx.fillStyle = p.hot ? '#FF8A3D' : '#F4F6F8'
+        ctx.beginPath()
+        ctx.moveTo(p.x, p.y - s * 2.2)
+        ctx.lineTo(p.x + s * 0.5, p.y - s * 0.5)
+        ctx.lineTo(p.x + s * 2.2, p.y)
+        ctx.lineTo(p.x + s * 0.5, p.y + s * 0.5)
+        ctx.lineTo(p.x, p.y + s * 2.2)
+        ctx.lineTo(p.x - s * 0.5, p.y + s * 0.5)
+        ctx.lineTo(p.x - s * 2.2, p.y)
+        ctx.lineTo(p.x - s * 0.5, p.y - s * 0.5)
+        ctx.closePath()
+        ctx.fill()
+        ctx.restore()
+      }
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [reduce])
+
+  return (
+    <canvas
+      ref={ref}
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[55] h-full w-full"
+    />
   )
 }
 
