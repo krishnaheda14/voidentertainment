@@ -245,16 +245,6 @@ export default function Hero({ ready }) {
           aria-hidden
         />
 
-        {/* mark — parked in the empty right-hand space beside the wordmark */}
-        <motion.img
-          src={logo}
-          alt="Void Entertainment"
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={ready ? { opacity: 0.95, scale: 1 } : {}}
-          transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-none absolute right-8 top-1/2 z-[5] hidden h-64 w-auto -translate-y-1/2 drop-shadow-[0_0_70px_rgba(255,90,0,.28)] xl:block 2xl:right-20 2xl:h-80"
-        />
-
         <motion.div style={reduce ? {} : { y, opacity: fade }} className="relative z-10">
           <div className="shell pb-10 sm:pb-14">
             {/* eyebrow row — real data, not decoration */}
@@ -272,39 +262,52 @@ export default function Hero({ ready }) {
               <span className="hidden md:inline">{brand.hours}</span>
             </motion.div>
 
-            {/* the wordmark */}
-            <h1 className="flex flex-wrap items-baseline leading-[0.8]">
-              <span className="sr-only">Void Entertainment — nightlife access in Bombay</span>
-              <span aria-hidden className="flex">
-                {letters.map((ch, i) => (
-                  <motion.span
-                    key={i}
-                    initial={{ y: '110%', opacity: 0 }}
-                    animate={ready ? { y: '0%', opacity: 1 } : {}}
-                    transition={{
-                      delay: 0.1 + i * 0.07,
-                      duration: 0.9,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    className="metal-flare inline-block font-display text-[clamp(5rem,25vw,20rem)] tracking-tightest"
-                  >
-                    {ch}
-                  </motion.span>
-                ))}
-              </span>
-            </h1>
+            {/* wordmark, with the mark riding parallel to it on the empty right side */}
+            <div className="flex items-center gap-8 xl:gap-12">
+              <div className="min-w-0">
+                <h1 className="flex flex-wrap items-baseline leading-[0.8]">
+                  <span className="sr-only">Void Entertainment — nightlife access in Bombay</span>
+                  <span aria-hidden className="flex">
+                    {letters.map((ch, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ y: '110%', opacity: 0 }}
+                        animate={ready ? { y: '0%', opacity: 1 } : {}}
+                        transition={{
+                          delay: 0.1 + i * 0.07,
+                          duration: 0.9,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className="metal-flare inline-block font-display text-[clamp(5rem,25vw,20rem)] tracking-tightest"
+                      >
+                        {ch}
+                      </motion.span>
+                    ))}
+                  </span>
+                </h1>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={ready ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.5, duration: 0.7 }}
-              className="mt-1 flex flex-wrap items-baseline gap-x-5 gap-y-2"
-            >
-              <span className="metal font-display text-[clamp(1.1rem,4.6vw,3.2rem)] tracking-[0.06em]">
-                ENTERTAINMENT
-              </span>
-              <span className="h-px flex-1 bg-silver/15" />
-            </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={ready ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.5, duration: 0.7 }}
+                  className="mt-1 flex flex-wrap items-baseline gap-x-5 gap-y-2"
+                >
+                  <span className="metal font-display text-[clamp(1.1rem,4.6vw,3.2rem)] tracking-[0.06em]">
+                    ENTERTAINMENT
+                  </span>
+                  <span className="h-px flex-1 bg-silver/15" />
+                </motion.div>
+              </div>
+
+              <motion.img
+                src={logo}
+                alt="Void Entertainment"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={ready ? { opacity: 0.95, scale: 1 } : {}}
+                transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                className="hidden h-36 w-auto shrink-0 drop-shadow-[0_0_60px_rgba(255,90,0,.28)] xl:block 2xl:h-44"
+              />
+            </div>
 
             {/* thesis line + CTAs */}
             <motion.div
