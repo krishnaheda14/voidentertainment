@@ -62,10 +62,10 @@ export function Ledger() {
   return (
     <section className="shell py-16 sm:py-20">
       <div className="rule mb-8" />
-      <dl className="grid gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid gap-y-8 sm:grid-cols-3">
         {stats.map((s, i) => (
           <Reveal key={s.label} delay={i * 0.06}>
-            <div className="border-silver/10 px-0 lg:border-l lg:px-8 lg:first:border-l-0 lg:first:pl-0">
+            <div className="border-silver/10 px-0 sm:border-l sm:px-8 sm:first:border-l-0 sm:first:pl-0">
               <dt className="metal-flare font-display text-[clamp(2.6rem,7vw,4.4rem)] leading-none">
                 {s.value}
               </dt>

@@ -21,8 +21,8 @@ export const brand = {
   // ---------------------------------------------------------------------
 
   email: 'book@voidentertainment.in',
-  instagram: 'https://instagram.com/voidentertainment',
-  instagramHandle: '@voidentertainment',
+  instagram: 'https://instagram.com/_voidentertainment',
+  instagramHandle: '@_voidentertainment',
   domain: 'voidentertainment.in', // used for SEO tags + sitemap
   hours: 'Desk open 11:00 – 04:00 IST, seven days',
 }
@@ -96,26 +96,6 @@ export const venues = [
     best: 'Thursday',
     tags: ['Rooftop', 'Sunset seating', 'Afro house'],
     image: '/media/venues/onrique.jpg',
-  },
-  {
-    slug: 'opa',
-    name: 'OPA KIPOS',
-    area: 'Worli · Lower Parel',
-    pin: '400025',
-    coords: [19.008, 72.8204],
-    door: '19:00',
-    close: '01:30',
-    floor: 'Ascent Worli',
-    capacity: '260',
-    sound: 'Greek · Mediterranean · Open format',
-    dress: 'Dress for photos. White works.',
-    address: 'Ascent Worli, Plot 248B, Lower Parel, Mumbai 400025',
-    maps: 'https://www.google.com/maps/search/?api=1&query=OPA+Kipos+Mumbai&query_place_id=ChIJvR9UgbrP5zsR2RTNYdlCsv8',
-    blurb:
-      'Santorini dropped into Worli. Live bouzouki, table dancing, and plates going into the floor at midnight. Closed Mondays. Book the plate-smash section or you are watching it from the bar.',
-    best: 'Saturday',
-    tags: ['Plate smash', 'Live act', 'Closed Mondays'],
-    image: '/media/venues/opa.jpg',
   },
   {
     slug: 'bastian-beach',
@@ -209,17 +189,6 @@ export const week = [
         table: 'From ₹25,000',
         status: 'filling',
       },
-      {
-        venue: 'opa',
-        title: 'Plate Smash Wednesday',
-        sub: 'Live bouzouki, plates at midnight',
-        artist: 'Live — Trio Kipos',
-        door: '19:00',
-        couple: '₹0 before 21:30',
-        stag: '₹1,200',
-        table: 'From ₹22,000',
-        status: 'open',
-      },
     ],
   },
   {
@@ -294,17 +263,6 @@ export const week = [
         status: 'filling',
       },
       {
-        venue: 'opa',
-        title: 'Greek Saturday',
-        sub: 'Table dancing sanctioned after 23:00',
-        artist: 'Live + DJ',
-        door: '19:00',
-        couple: '₹0 before 21:30',
-        stag: '₹2,000',
-        table: 'From ₹35,000',
-        status: 'open',
-      },
-      {
         venue: 'baglami',
         title: 'Saturday Late',
         sub: 'Third slot only — 23:00 entry',
@@ -331,17 +289,6 @@ export const week = [
         stag: '₹2,000',
         table: 'From ₹45,000',
         status: 'filling',
-      },
-      {
-        venue: 'opa',
-        title: 'Long Lunch',
-        sub: 'Afternoon service, plates at four',
-        artist: 'Live — Trio Kipos',
-        door: '12:00',
-        couple: '₹0',
-        stag: '₹0',
-        table: 'From ₹18,000',
-        status: 'open',
       },
     ],
   },
@@ -383,15 +330,6 @@ export const pastNights = [
     span: 'normal',
   },
   {
-    title: 'Plate Smash',
-    venue: 'OPA Kipos',
-    meta: '400 plates. One floor.',
-    poster: '/media/gallery/opa-plates.jpg',
-    youtube: '',
-    video: '',
-    span: 'normal',
-  },
-  {
     title: 'Low Ceiling 007',
     venue: 'MERCII',
     meta: 'Basement, tech house, 3am close',
@@ -412,10 +350,9 @@ export const pastNights = [
 ]
 
 export const stats = [
-  { value: '5', label: 'House venues', note: 'Bandra to Worli' },
+  { value: '4', label: 'House venues', note: 'Bandra to Juhu' },
   { value: '11k+', label: 'Entries sorted', note: 'Since 2022' },
-  { value: '40%', label: 'Average saved', note: 'Against walk-up cover' },
-  { value: '<10', label: 'Minute reply', note: 'On WhatsApp, most nights' },
+  { value: '6k+', label: 'Tables booked', note: 'Confirmed on WhatsApp' },
 ]
 
 export const howItWorks = [

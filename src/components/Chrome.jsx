@@ -146,7 +146,7 @@ export function Sparkles() {
     resize()
     window.addEventListener('resize', resize)
 
-    const count = window.innerWidth < 768 ? 16 : 30
+    const count = window.innerWidth < 768 ? 16 : 44
     const parts = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -315,7 +315,7 @@ export function Nav() {
 
           <div className="flex items-center gap-3">
             <VoidButton
-              href={waLink('Hi Void — I want to book a night out in Bombay.')}
+              href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
               size="sm"
               variant="solid"
               className="hidden sm:inline-flex"
@@ -377,7 +377,7 @@ export function Nav() {
 
             <div className="shell pb-10">
               <VoidButton
-                href={waLink('Hi Void — I want to book a night out in Bombay.')}
+                href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
                 size="lg"
                 className="w-full"
               >
@@ -426,7 +426,7 @@ export function WhatsAppFab() {
             aria-hidden
           />
           <a
-            href={waLink('Hi Void — I want to book a night out in Bombay.')}
+            href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
             target="_blank"
             rel="noreferrer noopener"
             className="relative flex items-center gap-3 bg-flare px-4 py-3.5 text-void-000 shadow-[0_0_40px_-6px_rgba(255,90,0,.75)] transition-colors hover:bg-flare-hot"

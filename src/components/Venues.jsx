@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { MapPin, MessageCircle, Navigation } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Navigation } from 'lucide-react'
 import { venues } from '../data/site'
 import { cx, useMediaQuery, waBooking } from '../lib/utils'
 import { Reveal, SectionHead, SmartImage, VoidButton } from './ui'
@@ -22,7 +21,7 @@ function VenueCard({ v, index, horizontal }) {
       className={cx(
         'panel group relative flex flex-col overflow-hidden',
         horizontal
-          ? 'h-[74vh] w-[min(88vw,1080px)] shrink-0 lg:flex-row'
+          ? 'h-[74vh] w-[min(80vw,980px)] shrink-0 lg:flex-row'
           : 'w-full'
       )}
     >
@@ -120,41 +119,47 @@ function VenueCard({ v, index, horizontal }) {
 }
 
 export default function Venues() {
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const reduce = useReducedMotion()
-  const horizontal = isDesktop && !reduce
+  const horizontal = useMediaQuery('(min-width: 1024px)')
 
-  const sectionRef = useRef(null)
   const trackRef = useRef(null)
-  const [distance, setDistance] = useState(0)
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  })
-  const x = useTransform(scrollYProgress, [0, 1], [0, -distance])
-  const progress = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
+  const [progress, setProgress] = useState(0)
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(true)
 
   useEffect(() => {
-    if (!horizontal) {
-      setDistance(0)
-      return
+    if (!horizontal) return
+    const el = trackRef.current
+    if (!el) return
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth
+      setProgress(max > 0 ? el.scrollLeft / max : 0)
+      setCanPrev(el.scrollLeft > 8)
+      setCanNext(el.scrollLeft < max - 8)
     }
-    const calc = () => {
-      const el = trackRef.current
-      if (!el) return
-      setDistance(Math.max(0, el.scrollWidth - window.innerWidth + 48))
-      // section height changes with `distance`; make the scroll tracker re-measure
-      requestAnimationFrame(() => window.dispatchEvent(new Event('scroll')))
-    }
-    calc()
-    const t = setTimeout(calc, 400) // after fonts/images settle
-    window.addEventListener('resize', calc)
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
     return () => {
-      clearTimeout(t)
-      window.removeEventListener('resize', calc)
+      el.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
     }
   }, [horizontal])
+
+  const nudge = (dir) => {
+    const el = trackRef.current
+    if (!el) return
+    const card = el.querySelector('article')
+    const step = card ? card.offsetWidth + 24 : el.clientWidth * 0.9
+    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
+
+  const arrowClass = (enabled) =>
+    cx(
+      'grid h-12 w-12 place-items-center border transition-all duration-300',
+      enabled
+        ? 'border-silver/25 bg-void-000/80 text-silver hover:border-flare hover:bg-flare hover:text-void-000'
+        : 'pointer-events-none border-silver/10 text-silver-lo opacity-40'
+    )
 
   return (
     <section id="venues" className="relative scroll-mt-20 py-20 sm:py-28">
@@ -167,32 +172,46 @@ export default function Venues() {
       </div>
 
       {horizontal ? (
-        <div
-          ref={sectionRef}
-          style={{ height: `calc(100vh + ${distance}px)` }}
-          className="relative"
-        >
-          <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-            <motion.div
-              ref={trackRef}
-              style={{ x }}
-              className="flex gap-6 pl-6 pr-6 xl:pl-12"
-            >
-              {venues.map((v, i) => (
-                <VenueCard key={v.slug} v={v} index={i} horizontal />
-              ))}
-            </motion.div>
+        <div className="relative">
+          <div
+            ref={trackRef}
+            className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pl-6 pr-6 xl:pl-12"
+          >
+            {venues.map((v, i) => (
+              <div key={v.slug} className="snap-start scroll-ml-6 xl:scroll-ml-12">
+                <VenueCard v={v} index={i} horizontal />
+              </div>
+            ))}
+          </div>
 
-            {/* floor progress */}
-            <div className="absolute bottom-10 left-1/2 w-[min(46vw,420px)] -translate-x-1/2">
-              <div className="mb-2 flex justify-between font-mono text-[9px] uppercase tracking-widest2 text-silver-lo">
-                <span>Bandra</span>
-                <span>Scroll the floor</span>
-                <span>Worli</span>
-              </div>
-              <div className="h-px w-full bg-silver/15">
-                <motion.div style={{ width: progress }} className="h-px bg-flare" />
-              </div>
+          {/* arrows */}
+          <button
+            onClick={() => nudge(-1)}
+            aria-label="Previous venue"
+            className={cx(arrowClass(canPrev), 'absolute left-4 top-1/2 z-10 -translate-y-1/2 backdrop-blur xl:left-8')}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={() => nudge(1)}
+            aria-label="Next venue"
+            className={cx(arrowClass(canNext), 'absolute right-4 top-1/2 z-10 -translate-y-1/2 backdrop-blur xl:right-8')}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          {/* floor progress */}
+          <div className="mx-auto mt-8 w-[min(46vw,420px)]">
+            <div className="mb-2 flex justify-between font-mono text-[9px] uppercase tracking-widest2 text-silver-lo">
+              <span>Santacruz</span>
+              <span>Walk the floor</span>
+              <span>Juhu</span>
+            </div>
+            <div className="h-px w-full bg-silver/15">
+              <div
+                style={{ width: `${Math.round(progress * 100)}%` }}
+                className="h-px bg-flare transition-[width] duration-150"
+              />
             </div>
           </div>
         </div>

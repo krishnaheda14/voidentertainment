@@ -60,9 +60,9 @@ function Embers() {
     resize()
     window.addEventListener('resize', resize)
 
-    const count = window.innerWidth < 768 ? 30 : 62
+    const count = window.innerWidth < 768 ? 30 : 84
     const parts = Array.from({ length: count }, () => {
-      const spark = Math.random() > 0.68
+      const spark = Math.random() > 0.6
       return {
         spark,
         x: Math.random() * w,
@@ -232,6 +232,27 @@ export default function Hero({ ready }) {
       <div className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pt-24">
         <Embers />
 
+        {/* club light beams — sweeping spotlights, desktop only */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block">
+          <div
+            className="absolute -top-[20%] left-0 h-[140%] w-24 animate-beam-a opacity-0"
+            style={{
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,90,0,.13) 30%, rgba(255,178,122,.19) 50%, rgba(255,90,0,.13) 70%, transparent)',
+              filter: 'blur(18px)',
+            }}
+          />
+          <div
+            className="absolute -top-[20%] left-0 h-[140%] w-16 animate-beam-b opacity-0"
+            style={{
+              background:
+                'linear-gradient(180deg, transparent, rgba(244,246,248,.09) 35%, rgba(244,246,248,.15) 50%, rgba(244,246,248,.09) 65%, transparent)',
+              filter: 'blur(14px)',
+              animationDelay: '7s',
+            }}
+          />
+        </div>
+
         {/* door frame — the two uprights from the preloader, kept as structure */}
         <div className="pointer-events-none absolute inset-y-0 left-6 hidden w-px bg-gradient-to-b from-transparent via-silver/20 to-transparent lg:block" />
         <div className="pointer-events-none absolute inset-y-0 right-6 hidden w-px bg-gradient-to-b from-transparent via-silver/20 to-transparent lg:block" />
@@ -258,12 +279,12 @@ export default function Hero({ ready }) {
                 <MapPin size={11} /> Bombay
               </span>
               <span>Est. 2022</span>
-              <span className="hidden sm:inline">5 house venues</span>
+              <span className="hidden sm:inline">4 house venues</span>
               <span className="hidden md:inline">{brand.hours}</span>
             </motion.div>
 
             {/* wordmark, with the mark riding parallel to it on the empty right side */}
-            <div className="flex items-center gap-8 xl:gap-12">
+            <div className="flex items-center justify-between gap-8">
               <div className="min-w-0">
                 <h1 className="flex flex-wrap items-baseline leading-[0.8]">
                   <span className="sr-only">Void Entertainment — nightlife access in Bombay</span>
@@ -317,7 +338,7 @@ export default function Hero({ ready }) {
               className="mt-9 grid gap-8 md:grid-cols-[1.25fr,1fr] md:items-end"
             >
               <p className="max-w-xl text-lg leading-snug text-silver sm:text-2xl">
-                Five of Bombay's hardest rooms.{' '}
+                Four of Bombay's hardest rooms.{' '}
                 <span className="text-silver-hi">One number.</span> We hold the
                 guestlists, we price the tables, and we get you through the door
                 for less than you would pay standing in it.
@@ -326,7 +347,7 @@ export default function Hero({ ready }) {
               <div className="flex flex-wrap gap-3">
                 <VoidButton
                   href={waLink(
-                    'Hi Void — I want to book a night out in Bombay. Date: , Headcount: '
+                    'Hi Team Void — I want to book a night out in Bombay. Date: , Headcount: '
                   )}
                   size="lg"
                 >

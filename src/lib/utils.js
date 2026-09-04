@@ -13,7 +13,7 @@ export function waLink(message = '') {
 }
 
 export function waBooking({ venue, night, title } = {}) {
-  const lines = ['Hi Void — I want to book through you.']
+  const lines = ['Hi Team Void — I want to book through you.']
   if (venue) lines.push(`Venue: ${venue}`)
   if (night) lines.push(`Night: ${night}`)
   if (title) lines.push(`Event: ${title}`)

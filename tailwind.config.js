@@ -43,6 +43,8 @@ export default {
         'door-pulse': 'door-pulse 3.4s ease-in-out infinite',
         'scan': 'scan 7s linear infinite',
         'blink': 'blink 1.6s steps(2, start) infinite',
+        'beam-a': 'beam 17s ease-in-out infinite',
+        'beam-b': 'beam 23s ease-in-out infinite',
       },
       keyframes: {
         'marquee-l': {
@@ -68,6 +70,12 @@ export default {
         blink: {
           '0%,100%': { opacity: '1' },
           '50%': { opacity: '0.15' },
+        },
+        beam: {
+          '0%': { transform: 'translateX(-25vw) rotate(16deg)', opacity: '0' },
+          '12%': { opacity: '1' },
+          '88%': { opacity: '1' },
+          '100%': { transform: 'translateX(115vw) rotate(16deg)', opacity: '0' },
         },
       },
     },

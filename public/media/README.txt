@@ -5,7 +5,6 @@ venues/   -> one photo per venue. Exact filenames the site looks for:
              mercii.jpg
              baglami.jpg
              onrique.jpg
-             opa.jpg
              bastian.jpg
              Recommended: 1600x1200 or larger, JPG, under 400 KB each.
 
@@ -13,7 +12,6 @@ gallery/  -> poster stills for the "Past nights" wall:
              nye-bastian.jpg
              onrique-012.jpg
              baglami-bolly.jpg
-             opa-plates.jpg
              mercii-low.jpg
              holi-bastian.jpg
              Recommended: 1600x1000, JPG, under 400 KB each.

@@ -90,7 +90,7 @@ export function Faq() {
    for you and hands it to WhatsApp. Works on a static host, works offline
    the moment the page is loaded, and nothing can silently fail to deliver.
    ========================================================================== */
-const KINDS = ['Guestlist', 'Table', 'Birthday', 'Corporate']
+const KINDS = ['Guestlist', 'Table', 'Private party']
 
 export function Book() {
   const [form, setForm] = useState({
@@ -107,7 +107,7 @@ export function Book() {
 
   const message = useMemo(() => {
     const l = [
-      `Hi Void${form.name ? `, this is ${form.name}` : ''} — booking request.`,
+      `Hi Team Void${form.name ? `, this is ${form.name}` : ''} — booking request.`,
       '',
       `Type: ${form.kind}`,
       `Venue: ${form.venue}`,
@@ -150,7 +150,7 @@ export function Book() {
 
               <div>
                 <span className="eyebrow mb-2 block">What do you need?</span>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {KINDS.map((k) => (
                     <button
                       key={k}
@@ -195,6 +195,9 @@ export function Book() {
                         {d.long}
                       </option>
                     ))}
+                    <option value="Suggest me the best night">
+                      Suggest me the best night
+                    </option>
                   </select>
                 </div>
 
@@ -273,7 +276,7 @@ export function Book() {
                 <ul className="grid gap-4">
                   <li>
                     <a
-                      href={waLink('Hi Void —')}
+                      href={waLink('Hi Team Void —')}
                       target="_blank"
                       rel="noreferrer noopener"
                       className="group flex items-center gap-4"
@@ -347,10 +350,10 @@ export function Footer() {
           <div>
             <p className="max-w-md text-[15px] leading-relaxed text-silver-mid">
               Void Entertainment runs guestlists, tables and private nights across{' '}
-              {brand.city}. Five house rooms, seven nights, one number.
+              {brand.city}. Four house rooms, seven nights, one number.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <VoidButton href={waLink('Hi Void —')} size="sm">
+              <VoidButton href={waLink('Hi Team Void —')} size="sm">
                 <MessageCircle size={13} strokeWidth={2.5} />
                 {brand.whatsappLabel}
               </VoidButton>

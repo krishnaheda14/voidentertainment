@@ -94,7 +94,7 @@ One deliberate detail: **anything before 06:00 IST still counts as the night bef
 
 ### Venues
 
-The `venues` array. Addresses, coordinates and Google Maps links are already filled in correctly for all five rooms. Change `blurb`, `sound`, `dress`, `tags`, `capacity` and `best` freely.
+The `venues` array. Addresses, coordinates and Google Maps links are already filled in correctly for all four rooms. Change `blurb`, `sound`, `dress`, `tags`, `capacity` and `best` freely.
 
 The `slug` is the ID that `week` events point at — if you rename a slug, update every event that references it.
 
@@ -108,13 +108,11 @@ When you have real assets, drop them in with these exact filenames:
 public/media/venues/mercii.jpg
 public/media/venues/baglami.jpg
 public/media/venues/onrique.jpg
-public/media/venues/opa.jpg
 public/media/venues/bastian.jpg
 
 public/media/gallery/nye-bastian.jpg
 public/media/gallery/onrique-012.jpg
 public/media/gallery/baglami-bolly.jpg
-public/media/gallery/opa-plates.jpg
 public/media/gallery/mercii-low.jpg
 public/media/gallery/holi-bastian.jpg
 ```
