@@ -23,7 +23,7 @@ export function waBooking({ venue, night, title } = {}) {
 
 /* --------------------------------------------------------------------------
    IST CLOCK
-   The site runs on Bombay time regardless of the visitor's device clock,
+   The site runs on Mumbai time regardless of the visitor's device clock,
    so "tonight" always means tonight here.
    -------------------------------------------------------------------------- */
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']

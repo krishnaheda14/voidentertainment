@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Menu, X, MessageCircle, Instagram } from 'lucide-react'
+import { Lock, Menu, X, MessageCircle, Instagram } from 'lucide-react'
 import { brand } from '../data/site'
 import logo from '../data/logo-mark.png'
 import { waLink, scrollToId, cx, useMediaQuery } from '../lib/utils'
@@ -296,7 +296,7 @@ export function Nav() {
           >
             <img src={logo} alt="Void Entertainment" className="h-10 w-auto sm:h-12" />
             <span className="hidden font-mono text-[9px] uppercase tracking-widest2 text-silver-lo sm:block">
-              Bombay
+              Mumbai
             </span>
           </button>
 
@@ -315,7 +315,7 @@ export function Nav() {
 
           <div className="flex items-center gap-3">
             <VoidButton
-              href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
+              href={waLink('Hi Team Void — I want to book a night out in Mumbai.')}
               size="sm"
               variant="solid"
               className="hidden sm:inline-flex"
@@ -323,6 +323,15 @@ export function Nav() {
               <MessageCircle size={13} strokeWidth={2.5} />
               WhatsApp
             </VoidButton>
+
+            <button
+              onClick={() => window.dispatchEvent(new Event('void:admin-open'))}
+              className="hidden h-10 w-10 place-items-center border border-silver/15 text-silver-lo transition-colors hover:border-flare hover:text-flare sm:grid"
+              aria-label="Admin login"
+              title="Admin"
+            >
+              <Lock size={14} />
+            </button>
 
             <button
               onClick={() => setOpen(true)}
@@ -377,7 +386,7 @@ export function Nav() {
 
             <div className="shell pb-10">
               <VoidButton
-                href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
+                href={waLink('Hi Team Void — I want to book a night out in Mumbai.')}
                 size="lg"
                 className="w-full"
               >
@@ -392,6 +401,15 @@ export function Nav() {
               >
                 <Instagram size={13} /> {brand.instagramHandle}
               </a>
+              <button
+                onClick={() => {
+                  setOpen(false)
+                  window.dispatchEvent(new Event('void:admin-open'))
+                }}
+                className="mt-4 flex w-full items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest2 text-silver-lo"
+              >
+                <Lock size={12} /> Admin
+              </button>
             </div>
           </motion.div>
         )}
@@ -426,7 +444,7 @@ export function WhatsAppFab() {
             aria-hidden
           />
           <a
-            href={waLink('Hi Team Void — I want to book a night out in Bombay.')}
+            href={waLink('Hi Team Void — I want to book a night out in Mumbai.')}
             target="_blank"
             rel="noreferrer noopener"
             className="relative flex items-center gap-3 bg-flare px-4 py-3.5 text-void-000 shadow-[0_0_40px_-6px_rgba(255,90,0,.75)] transition-colors hover:bg-flare-hot"

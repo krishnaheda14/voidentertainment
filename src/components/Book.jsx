@@ -1,88 +1,15 @@
 import { useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUp,
   Instagram,
   Mail,
   MessageCircle,
-  Minus,
   Phone,
-  Plus,
 } from 'lucide-react'
-import { brand, faqs, venues, week } from '../data/site'
+import { brand, venues } from '../data/site'
 import { cx, scrollToId, waLink } from '../lib/utils'
+import { useOverridableWeek } from '../lib/admin'
 import { Reveal, SectionHead, VoidButton } from './ui'
-
-/* ==========================================================================
-   FAQ
-   ========================================================================== */
-export function Faq() {
-  const [open, setOpen] = useState(0)
-
-  return (
-    <section className="relative py-20 sm:py-28">
-      <div className="shell">
-        <SectionHead
-          eyebrow={`Questions · ${faqs.length}`}
-          title="Before you ask"
-          meta="The things people message us about most. Anything not covered here, just ask the desk directly — it is faster than reading."
-        />
-
-        <div className="border-t border-silver/10">
-          {faqs.map((f, i) => {
-            const isOpen = open === i
-            return (
-              <Reveal key={f.q} delay={i * 0.04}>
-                <div className="border-b border-silver/10">
-                  <button
-                    onClick={() => setOpen(isOpen ? -1 : i)}
-                    aria-expanded={isOpen}
-                    className="group flex w-full items-center justify-between gap-6 py-6 text-left"
-                  >
-                    <span
-                      className={cx(
-                        'font-display text-[clamp(1.15rem,3.2vw,1.85rem)] uppercase leading-tight transition-colors duration-300',
-                        isOpen ? 'text-flare' : 'metal group-hover:text-flare group-hover:[-webkit-text-fill-color:currentColor]'
-                      )}
-                    >
-                      {f.q}
-                    </span>
-                    <span
-                      className={cx(
-                        'grid h-9 w-9 shrink-0 place-items-center border transition-all duration-300',
-                        isOpen
-                          ? 'border-flare bg-flare text-void-000'
-                          : 'border-silver/20 text-silver group-hover:border-flare'
-                      )}
-                    >
-                      {isOpen ? <Minus size={15} /> : <Plus size={15} />}
-                    </span>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <p className="max-w-3xl pb-7 pr-12 text-[15px] leading-relaxed text-silver-mid">
-                          {f.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </Reveal>
-            )
-          })}
-        </div>
-      </div>
-    </section>
-  )
-}
 
 /* ==========================================================================
    BOOKING COMPOSER
@@ -93,15 +20,16 @@ export function Faq() {
 const KINDS = ['Guestlist', 'Table', 'Private party']
 
 export function Book() {
-  const [form, setForm] = useState({
+  const { week } = useOverridableWeek()
+  const [form, setForm] = useState(() => ({
     name: '',
     kind: 'Guestlist',
     venue: venues[0].name,
-    night: week[4]?.long || 'Friday',
+    night: week.find((d) => d.day === 'Fri')?.long || week[0]?.long || 'Friday',
     heads: '4',
     date: '',
     notes: '',
-  })
+  }))
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -350,7 +278,7 @@ export function Footer() {
           <div>
             <p className="max-w-md text-[15px] leading-relaxed text-silver-mid">
               Void Entertainment runs guestlists, tables and private nights across{' '}
-              {brand.city}. Four house rooms, seven nights, one number.
+              {brand.city}. Every room worth knowing, one number.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <VoidButton href={waLink('Hi Team Void —')} size="sm">

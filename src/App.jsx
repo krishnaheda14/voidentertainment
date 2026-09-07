@@ -7,7 +7,8 @@ import Schedule from './components/Schedule'
 import Venues from './components/Venues'
 import PastNights from './components/PastNights'
 import { Ticker, Ledger, Process } from './components/Strip'
-import { Faq, Book, Footer } from './components/Book'
+import { Book, Footer } from './components/Book'
+import AdminPanel from './components/AdminPanel'
 import { useSmoothScroll } from './lib/utils'
 
 export default function App() {
@@ -60,12 +61,12 @@ export default function App() {
         <Venues />
         <Process />
         <PastNights />
-        <Faq />
         <Book />
       </main>
 
       <Footer />
       <WhatsAppFab />
+      <AdminPanel />
     </div>
   )
 }

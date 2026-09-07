@@ -120,11 +120,12 @@ function VenueCard({ v, index, horizontal }) {
 
 export default function Venues() {
   const horizontal = useMediaQuery('(min-width: 1024px)')
+  const n = venues.length
 
   const trackRef = useRef(null)
+  const cardRefs = useRef([])
   const [progress, setProgress] = useState(0)
-  const [canPrev, setCanPrev] = useState(false)
-  const [canNext, setCanNext] = useState(true)
+  const [current, setCurrent] = useState(0)
 
   useEffect(() => {
     if (!horizontal) return
@@ -133,8 +134,18 @@ export default function Venues() {
     const update = () => {
       const max = el.scrollWidth - el.clientWidth
       setProgress(max > 0 ? el.scrollLeft / max : 0)
-      setCanPrev(el.scrollLeft > 8)
-      setCanNext(el.scrollLeft < max - 8)
+
+      let nearest = 0
+      let best = Infinity
+      cardRefs.current.forEach((c, i) => {
+        if (!c) return
+        const d = Math.abs(c.offsetLeft - el.scrollLeft)
+        if (d < best) {
+          best = d
+          nearest = i
+        }
+      })
+      setCurrent(nearest)
     }
     update()
     el.addEventListener('scroll', update, { passive: true })
@@ -145,29 +156,26 @@ export default function Venues() {
     }
   }, [horizontal])
 
+  // Circular: past the last card, next wraps to the first (and back again from prev).
   const nudge = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    const card = el.querySelector('article')
-    const step = card ? card.offsetWidth + 24 : el.clientWidth * 0.9
-    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+    const target = (current + dir + n) % n
+    cardRefs.current[target]?.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'start',
+      block: 'nearest',
+    })
   }
 
-  const arrowClass = (enabled) =>
-    cx(
-      'grid h-12 w-12 place-items-center border transition-all duration-300',
-      enabled
-        ? 'border-silver/25 bg-void-000/80 text-silver hover:border-flare hover:bg-flare hover:text-void-000'
-        : 'pointer-events-none border-silver/10 text-silver-lo opacity-40'
-    )
+  const arrowClass =
+    'grid h-12 w-12 place-items-center border border-silver/25 bg-void-000/80 text-silver backdrop-blur transition-all duration-300 hover:border-flare hover:bg-flare hover:text-void-000'
 
   return (
     <section id="venues" className="relative scroll-mt-20 py-20 sm:py-28">
       <div className="shell">
         <SectionHead
-          eyebrow={`The rooms · ${venues.length} venues`}
+          eyebrow="Filling fast · Mumbai"
           title="Where we work"
-          meta="These are our house rooms. We know the door staff, the floor managers and the table map at every one of them, which is the only reason any of this works."
+          meta="We work with every serious room in Mumbai — these are the ones filling up fastest right now. Do not see the one you want? Message the desk, we probably already have a door there."
         />
       </div>
 
@@ -178,24 +186,28 @@ export default function Venues() {
             className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pl-6 pr-6 xl:pl-12"
           >
             {venues.map((v, i) => (
-              <div key={v.slug} className="snap-start scroll-ml-6 xl:scroll-ml-12">
+              <div
+                key={v.slug}
+                ref={(el) => (cardRefs.current[i] = el)}
+                className="snap-start scroll-ml-6 xl:scroll-ml-12"
+              >
                 <VenueCard v={v} index={i} horizontal />
               </div>
             ))}
           </div>
 
-          {/* arrows */}
+          {/* arrows — the carousel loops, so these never disable */}
           <button
             onClick={() => nudge(-1)}
             aria-label="Previous venue"
-            className={cx(arrowClass(canPrev), 'absolute left-4 top-1/2 z-10 -translate-y-1/2 backdrop-blur xl:left-8')}
+            className={cx(arrowClass, 'absolute left-4 top-1/2 z-10 -translate-y-1/2 xl:left-8')}
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => nudge(1)}
             aria-label="Next venue"
-            className={cx(arrowClass(canNext), 'absolute right-4 top-1/2 z-10 -translate-y-1/2 backdrop-blur xl:right-8')}
+            className={cx(arrowClass, 'absolute right-4 top-1/2 z-10 -translate-y-1/2 xl:right-8')}
           >
             <ChevronRight size={18} />
           </button>
@@ -203,7 +215,7 @@ export default function Venues() {
           {/* floor progress */}
           <div className="mx-auto mt-8 w-[min(46vw,420px)]">
             <div className="mb-2 flex justify-between font-mono text-[9px] uppercase tracking-widest2 text-silver-lo">
-              <span>Santacruz</span>
+              <span>Bandra</span>
               <span>Walk the floor</span>
               <span>Juhu</span>
             </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowDown, MapPin, MessageCircle } from 'lucide-react'
-import { brand, week, venues } from '../data/site'
+import { brand, venues } from '../data/site'
 import logo from '../data/logo-mark.png'
 import {
   nightlifeDay,
@@ -11,6 +11,7 @@ import {
   waBooking,
   waLink,
 } from '../lib/utils'
+import { useOverridableWeek } from '../lib/admin'
 import { VoidButton, StatusDot } from './ui'
 
 /* ==========================================================================
@@ -124,10 +125,11 @@ function Embers() {
 
 /* ==========================================================================
    TONIGHT RAIL — the signature.
-   Reads the real Bombay clock, works out which night it is (anything before
+   Reads the real Mumbai clock, works out which night it is (anything before
    06:00 still counts as the night before), and counts down to the first door.
    ========================================================================== */
 export function TonightRail() {
+  const { week } = useOverridableWeek()
   const now = useIST()
   const today = nightlifeDay(now)
   const block = week.find((d) => d.day === today)
@@ -149,7 +151,7 @@ export function TonightRail() {
             </span>
             <div>
               <div className="font-mono text-[10px] uppercase tracking-widest2 text-silver-lo">
-                Bombay · {now.clock} IST
+                Mumbai · {now.clock} IST
               </div>
               <div className="metal font-display text-2xl leading-none sm:text-3xl">
                 {block?.long ?? 'Tonight'}
@@ -276,10 +278,10 @@ export default function Hero({ ready }) {
               className="mb-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-widest2 text-silver-lo"
             >
               <span className="flex items-center gap-1.5 text-flare">
-                <MapPin size={11} /> Bombay
+                <MapPin size={11} /> Mumbai
               </span>
               <span>Est. 2022</span>
-              <span className="hidden sm:inline">4 house venues</span>
+              <span className="hidden sm:inline">All over Mumbai</span>
               <span className="hidden md:inline">{brand.hours}</span>
             </motion.div>
 
@@ -287,7 +289,7 @@ export default function Hero({ ready }) {
             <div className="flex items-center justify-between gap-8">
               <div className="min-w-0">
                 <h1 className="flex flex-wrap items-baseline leading-[0.8]">
-                  <span className="sr-only">Void Entertainment — nightlife access in Bombay</span>
+                  <span className="sr-only">Void Entertainment — nightlife access in Mumbai</span>
                   <span aria-hidden className="flex">
                     {letters.map((ch, i) => (
                       <motion.span
@@ -338,7 +340,7 @@ export default function Hero({ ready }) {
               className="mt-9 grid gap-8 md:grid-cols-[1.25fr,1fr] md:items-end"
             >
               <p className="max-w-xl text-lg leading-snug text-silver sm:text-2xl">
-                Four of Bombay's hardest rooms.{' '}
+                All of Mumbai's hardest rooms.{' '}
                 <span className="text-silver-hi">One number.</span> We hold the
                 guestlists, we price the tables, and we get you through the door
                 for less than you would pay standing in it.
@@ -347,7 +349,7 @@ export default function Hero({ ready }) {
               <div className="flex flex-wrap gap-3">
                 <VoidButton
                   href={waLink(
-                    'Hi Team Void — I want to book a night out in Bombay. Date: , Headcount: '
+                    'Hi Team Void — I want to book a night out in Mumbai. Date: , Headcount: '
                   )}
                   size="lg"
                 >

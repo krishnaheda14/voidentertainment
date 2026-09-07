@@ -1,6 +1,6 @@
 # VOID ENTERTAINMENT
 
-Website for Void Entertainment — nightlife access, guestlists and table bookings across Bombay.
+Website for Void Entertainment — nightlife access, guestlists and table bookings across Mumbai.
 
 Built with React + Vite + Tailwind + Framer Motion. Static output, no server, no database. Deploys to Cloudflare Pages in about three minutes.
 
@@ -88,7 +88,7 @@ Add as many events per night as you like — they stack. A night with an empty `
 
 ### The live "tonight" rail
 
-The strip under the hero reads the real Bombay clock, works out what night it is, and counts down to the first door of the evening. You do not configure this — it just follows whatever is in `week`.
+The strip under the hero reads the real Mumbai clock, works out what night it is, and counts down to the first door of the evening. You do not configure this — it just follows whatever is in `week`.
 
 One deliberate detail: **anything before 06:00 IST still counts as the night before.** At 1am on Saturday the site still shows you Friday's programme, because that is the night people are actually out on.
 
@@ -188,7 +188,7 @@ void-entertainment/
 | WhatsApp button opens the wrong chat | `brand.whatsapp` in `src/data/site.js` — digits only, country code, no `+` |
 | An event does not show up | Its `venue` value must exactly match a venue `slug`, and `day` must be one of the seven three-letter codes |
 | Photos not appearing | Filename and folder must match exactly, and files go in `public/media/…`, not `src/` |
-| Countdown looks wrong | It runs on Bombay time on purpose, whatever your laptop clock says |
+| Countdown looks wrong | It runs on Mumbai time on purpose, whatever your laptop clock says |
 | Fonts look plain | The Google Fonts request is being blocked — check your connection or ad blocker |
 
 ---

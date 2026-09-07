@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Void Entertainment — nightlife access, guestlists and table bookings across Bombay.",
+  "description": "Void Entertainment — nightlife access, guestlists and table bookings across Mumbai.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

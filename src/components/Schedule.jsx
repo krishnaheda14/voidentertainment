@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Clock, Music2, Users } from 'lucide-react'
-import { week, weekLabel, venues } from '../data/site'
+import { venues } from '../data/site'
 import { cx, nightlifeDay, waBooking } from '../lib/utils'
+import { useOverridableWeek } from '../lib/admin'
 import { Reveal, SectionHead, SmartImage, StatusDot } from './ui'
 
 function EventRow({ ev, day, index }) {
@@ -109,18 +110,19 @@ function EventRow({ ev, day, index }) {
 }
 
 export default function Schedule() {
+  const { week, weekLabel } = useOverridableWeek()
   const today = useMemo(() => nightlifeDay(), [])
   const [active, setActive] = useState(() =>
     Math.max(0, week.findIndex((d) => d.day === today))
   )
-  const day = week[active] ?? week[0]
+  const day = week[Math.min(active, week.length - 1)] ?? week[0]
 
   return (
     <section id="week" className="relative scroll-mt-20 py-20 sm:py-28">
       <div className="shell">
         <SectionHead
           eyebrow={`The week · ${weekLabel}`}
-          title="Seven nights"
+          title="The lineup"
           meta="Pick a night. Every rate below is what you actually pay through us, not the walk-up number. Rates move — the desk confirms on WhatsApp before anything is held."
         />
 

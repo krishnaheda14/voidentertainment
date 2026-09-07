@@ -12,7 +12,7 @@
 export const brand = {
   name: 'VOID',
   full: 'Void Entertainment',
-  city: 'Bombay',
+  city: 'Mumbai',
   tagline: 'Nightlife access, handled.',
 
   // ---- CHANGE THIS ----------------------------------------------------
@@ -69,7 +69,7 @@ export const venues = [
     dress: 'Party smart. Collars help after midnight.',
     address:
       'INS Tower, G Block, BKC 7, opposite NMACC, Bandra Kurla Complex, Bandra East, Mumbai 400098',
-    maps: 'https://www.google.com/maps/search/?api=1&query=Baglami+Bombay+BKC&query_place_id=ChIJgynv30zJ5zsRQFUvz43Dn-Q',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Baglami+Mumbai+BKC&query_place_id=ChIJgynv30zJ5zsRQFUvz43Dn-Q',
     blurb:
       'Anatolian room opposite NMACC that runs a strict two-hour dining slot, then flips into the loudest Bollywood floor in BKC. Miss your slot and you lose the table — so let us hold it.',
     best: 'Saturday',
@@ -118,6 +118,46 @@ export const venues = [
     tags: ['Poolside', 'Sundowner', 'High cover — we cut it'],
     image: '/media/venues/bastian.jpg',
   },
+  {
+    slug: 'megumi',
+    name: 'MEGUMI',
+    area: 'Santacruz West',
+    pin: '400054',
+    coords: [19.0805, 72.8365],
+    door: '20:00',
+    close: '01:30',
+    floor: 'Ground + mezzanine',
+    capacity: '160',
+    sound: 'Japanese lounge · Deep house · Late-night DJ sets',
+    dress: 'Elevated smart. Dress sharp after nine.',
+    address: 'Ground Floor, Turner Road, Santacruz West, Mumbai 400054',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Megumi+Santacruz+Mumbai',
+    blurb:
+      'Omakase counter up front, a DJ booth in the back. The quietest-looking door in Santacruz hides the loudest room past midnight — small floor, serious sound system, and a table map we know cold.',
+    best: 'Wednesday',
+    tags: ['Omakase to floor', 'Intimate room', 'Late-night DJs'],
+    image: '/media/venues/megumi.jpg',
+  },
+  {
+    slug: 'all-saints',
+    name: 'ALL SAINTS',
+    area: 'Bandra West',
+    pin: '400050',
+    coords: [19.0596, 72.8295],
+    door: '20:00',
+    close: '01:30',
+    floor: 'First floor',
+    capacity: '250',
+    sound: 'House · Techno · Underground bookings',
+    dress: 'Streetwear smart. No formals, no flip-flops.',
+    address: 'First Floor, All Saints Road, Bandra West, Mumbai 400050',
+    maps: 'https://www.google.com/maps/search/?api=1&query=All+Saints+Road+Bandra+Mumbai',
+    blurb:
+      'The Bandra underground room, named for the road it sits on. Real bookings, a proper rig, and a crowd that came for the music first — no bottle-service theatre here.',
+    best: 'Saturday',
+    tags: ['Underground bookings', 'Real sound system', 'Bandra crowd'],
+    image: '/media/venues/all-saints.jpg',
+  },
 ]
 
 /* --------------------------------------------------------------------------
@@ -129,51 +169,6 @@ export const venues = [
 export const weekLabel = 'Week of 24 – 30 August'
 
 export const week = [
-  {
-    day: 'Mon',
-    long: 'Monday',
-    events: [
-      {
-        venue: 'bastian-beach',
-        title: 'Slow Monday',
-        sub: 'Sundowner set on the pool deck',
-        artist: 'Resident — Kabir',
-        door: '17:00',
-        couple: '₹0 before 20:00',
-        stag: '₹1,000',
-        table: 'From ₹15,000',
-        status: 'open',
-      },
-      {
-        venue: 'mercii',
-        title: 'Service Industry Night',
-        sub: 'Hospitality staff drink at cost',
-        artist: 'Open format',
-        door: '20:00',
-        couple: '₹0',
-        stag: '₹800',
-        table: 'From ₹20,000',
-        status: 'open',
-      },
-    ],
-  },
-  {
-    day: 'Tue',
-    long: 'Tuesday',
-    events: [
-      {
-        venue: 'onrique',
-        title: 'Terrace Tuesdays',
-        sub: 'Latin and Caribbean, roof open',
-        artist: 'DJ Naina',
-        door: '19:30',
-        couple: '₹0 before 21:00',
-        stag: '₹1,000',
-        table: 'From ₹18,000',
-        status: 'open',
-      },
-    ],
-  },
   {
     day: 'Wed',
     long: 'Wednesday',
@@ -350,7 +345,7 @@ export const pastNights = [
 ]
 
 export const stats = [
-  { value: '4', label: 'House venues', note: 'Bandra to Juhu' },
+  { value: '10+', label: 'Venues', note: 'All over Mumbai' },
   { value: '11k+', label: 'Entries sorted', note: 'Since 2022' },
   { value: '6k+', label: 'Tables booked', note: 'Confirmed on WhatsApp' },
 ]
@@ -367,32 +362,5 @@ export const howItWorks = [
   {
     step: 'Name goes down',
     body: 'Confirmed on WhatsApp with the door time and who to ask for. Turn up, say Void, walk in.',
-  },
-]
-
-export const faqs = [
-  {
-    q: 'What does Void actually charge me?',
-    a: 'Nothing on guestlist entries — the venue pays us. On tables and large groups we quote you the venue minimum with our rate already applied, so the number you see is the number you pay. No booking fee is ever added on top.',
-  },
-  {
-    q: 'How far ahead should I message?',
-    a: 'Weeknights, same day is fine. Friday and Saturday at Bastian, Bağlami or MERCII, give us two to three days. Big group, birthday, or a bachelorette — a week.',
-  },
-  {
-    q: 'Do you handle stag entry?',
-    a: 'Yes, at every venue on this page, which is the part most lists quietly skip. Rates are on the schedule above. Groups of four or more stags need a heads-up so we can clear it with the door first.',
-  },
-  {
-    q: 'What if the door still turns me away?',
-    a: 'Call the number on your confirmation from outside the venue and we handle it live. That is the whole point of booking through a person instead of a link.',
-  },
-  {
-    q: 'Can you do birthdays and private events?',
-    a: 'Full section takeovers, cake and sparkler entry, custom decor and a photographer if you want one. Send the date and headcount and we will come back with two or three rooms that fit.',
-  },
-  {
-    q: 'Is there a dress code?',
-    a: 'Every venue has one and every venue enforces it. Rules per room are on the venue cards. Short version: no shorts, no slides, no sportswear after nine.',
   },
 ]
