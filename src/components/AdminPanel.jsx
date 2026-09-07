@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Lock, X, Check, Trash2 } from 'lucide-react'
+import { Lock, X, Check, Trash2, UploadCloud } from 'lucide-react'
 import { week as defaultWeek, weekLabel as defaultWeekLabel, brand as defaultBrand } from '../data/site'
 import {
   checkLogin,
@@ -31,6 +31,9 @@ function currentOverridesJson() {
 export default function AdminPanel() {
   const [open, setOpen] = useState(false)
   const [loggedIn, setLoggedIn] = useState(isAdmin)
+  // Kept in memory only (never persisted) so /api/save-content can
+  // re-verify each publish server-side. Cleared on logout or tab close.
+  const [creds, setCreds] = useState(null)
 
   useEffect(() => {
     const onOpen = () => setOpen(true)
@@ -77,9 +80,20 @@ export default function AdminPanel() {
           </div>
 
           {loggedIn ? (
-            <EditPanel onLogout={() => setLoggedIn(false)} onClose={() => setOpen(false)} />
+            <EditPanel
+              creds={creds}
+              onLogout={() => {
+                setCreds(null)
+                setLoggedIn(false)
+              }}
+            />
           ) : (
-            <LoginForm onSuccess={() => setLoggedIn(true)} />
+            <LoginForm
+              onSuccess={(c) => {
+                setCreds(c)
+                setLoggedIn(true)
+              }}
+            />
           )}
         </motion.div>
       </motion.div>
@@ -97,11 +111,12 @@ function LoginForm({ onSuccess }) {
     e.preventDefault()
     setBusy(true)
     setError('')
-    const ok = await checkLogin(id.trim(), password)
+    const trimmedId = id.trim()
+    const ok = await checkLogin(trimmedId, password)
     setBusy(false)
     if (ok) {
       setAdmin()
-      onSuccess()
+      onSuccess({ id: trimmedId, password })
     } else {
       setError('Wrong ID or password.')
     }
@@ -141,38 +156,71 @@ function LoginForm({ onSuccess }) {
   )
 }
 
-function EditPanel({ onLogout, onClose }) {
+function EditPanel({ creds, onLogout }) {
   const [text, setText] = useState(currentOverridesJson)
   const [error, setError] = useState('')
-  const [saved, setSaved] = useState(false)
+  const [status, setStatus] = useState(null) // 'previewed' | 'publishing' | 'published' | 'publish-error'
   const timer = useRef(null)
 
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  const flash = () => {
-    setSaved(true)
+  const flash = (next) => {
+    setStatus(next)
     clearTimeout(timer.current)
-    timer.current = setTimeout(() => setSaved(false), 1800)
+    if (next === 'previewed' || next === 'published') {
+      timer.current = setTimeout(() => setStatus(null), 3000)
+    }
   }
 
-  const save = () => {
+  const parse = () => {
     setError('')
     let parsed
     try {
       parsed = JSON.parse(text)
     } catch {
       setError('That is not valid JSON.')
-      return
+      return null
     }
     try {
       validateWeek(parsed.week)
     } catch (err) {
       setError(err.message)
-      return
+      return null
     }
+    return parsed
+  }
+
+  const preview = () => {
+    const parsed = parse()
+    if (!parsed) return
     saveOverrides(parsed)
     notifyDataChanged()
-    flash()
+    flash('previewed')
+  }
+
+  const publish = async () => {
+    const parsed = parse()
+    if (!parsed) return
+
+    // Preview locally too, so the admin sees the change immediately while
+    // the GitHub commit + Vercel deploy catch up.
+    saveOverrides(parsed)
+    notifyDataChanged()
+    flash('publishing')
+
+    try {
+      const res = await fetch('/api/save-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...creds, ...parsed }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || `Publish failed (${res.status})`)
+      flash('published')
+    } catch (err) {
+      setError(err.message || 'Failed to publish.')
+      flash('publish-error')
+    }
   }
 
   const reset = () => {
@@ -180,16 +228,16 @@ function EditPanel({ onLogout, onClose }) {
     notifyDataChanged()
     setText(currentOverridesJson())
     setError('')
-    flash()
+    flash('previewed')
   }
 
   return (
     <div className="px-5 py-5">
       <p className="mb-3 text-xs leading-relaxed text-silver-mid">
         Edit <code className="text-silver-hi">weekLabel</code>, <code className="text-silver-hi">week</code> and{' '}
-        <code className="text-silver-hi">brand</code> as JSON. Saving previews live in this browser only —
-        paste the JSON into <code className="text-silver-hi">src/data/site.js</code> and redeploy for everyone
-        else to see it.
+        <code className="text-silver-hi">brand</code> as JSON. <strong className="text-silver-hi">Publish live</strong>{' '}
+        commits this straight to GitHub, which redeploys the site for everyone in about a minute.{' '}
+        <strong className="text-silver-hi">Preview only</strong> just previews it in this browser.
       </p>
       <textarea
         value={text}
@@ -199,15 +247,28 @@ function EditPanel({ onLogout, onClose }) {
         className="w-full resize-y border border-silver/15 bg-void-000 p-3 font-mono text-[11px] leading-relaxed text-silver-hi outline-none transition-colors focus:border-flare"
       />
       {error && <p className="mt-2 text-xs text-flare">{error}</p>}
-      {saved && !error && (
+      {!error && status === 'previewed' && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
-          <Check size={13} /> Saved to this browser.
+          <Check size={13} /> Previewed in this browser only.
+        </p>
+      )}
+      {!error && status === 'publishing' && (
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-silver-mid">
+          <UploadCloud size={13} className="animate-pulse" /> Publishing to GitHub…
+        </p>
+      )}
+      {!error && status === 'published' && (
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
+          <Check size={13} /> Published. Live for everyone in ~1–2 minutes.
         </p>
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <VoidButton size="sm" onClick={save}>
-          <Check size={13} /> Save
+        <VoidButton size="sm" onClick={publish} disabled={status === 'publishing'}>
+          <UploadCloud size={13} /> {status === 'publishing' ? 'Publishing…' : 'Publish live'}
+        </VoidButton>
+        <VoidButton size="sm" variant="ghost" onClick={preview}>
+          <Check size={13} /> Preview only
         </VoidButton>
         <VoidButton size="sm" variant="ghost" onClick={reset}>
           <Trash2 size={13} /> Reset to defaults

@@ -1,31 +1,27 @@
 /* ==========================================================================
    VOID ENTERTAINMENT — SITE CONTENT
    --------------------------------------------------------------------------
-   This is the ONLY file you need to edit for day-to-day changes.
-   Change the schedule here every Monday, redeploy, done.
+   Day-to-day edits (weekly schedule, WhatsApp number, brand info) go in
+   `./content.json`, not this file — see the note below. Venues, past nights,
+   stats and how-it-works still live here, further down.
 
-   >>> STEP 1: PUT YOUR REAL WHATSAPP NUMBER IN `brand.whatsapp` BELOW. <<<
+   >>> STEP 1: PUT YOUR REAL WHATSAPP NUMBER IN `brand.whatsapp` IN content.json. <<<
        Format: country code + number, digits only, no +, no spaces.
        Example for +91 98765 43210  ->  '919876543210'
    ========================================================================== */
 
-export const brand = {
-  name: 'VOID',
-  full: 'Void Entertainment',
-  city: 'Mumbai',
-  tagline: 'Nightlife access, handled.',
+/* --------------------------------------------------------------------------
+   `brand`, `weekLabel` and `week` now live in `./content.json`, not here.
+   That is the file the admin panel (the lock icon in the nav) edits and
+   commits straight to GitHub — see src/lib/admin.js and api/save-content.js.
+   To change them by hand, just edit content.json the same way you always
+   edited this file; nothing else about the shape has changed.
+   -------------------------------------------------------------------------- */
+import content from './content.json'
 
-  // ---- CHANGE THIS ----------------------------------------------------
-  whatsapp: '919420169352', // owner's WhatsApp, digits only, with country code
-  whatsappLabel: '+91 94201 69352', // what gets shown on screen
-  // ---------------------------------------------------------------------
-
-  email: 'book@voidentertainment.in',
-  instagram: 'https://instagram.com/_voidentertainment',
-  instagramHandle: '@_voidentertainment',
-  domain: 'voidentertainment.in', // used for SEO tags + sitemap
-  hours: 'Desk open 11:00 – 04:00 IST, seven days',
-}
+export const brand = content.brand
+export const weekLabel = content.weekLabel
+export const week = content.week
 
 /* --------------------------------------------------------------------------
    VENUES
@@ -157,135 +153,6 @@ export const venues = [
     best: 'Saturday',
     tags: ['Underground bookings', 'Real sound system', 'Bandra crowd'],
     image: '/media/venues/all-saints.jpg',
-  },
-]
-
-/* --------------------------------------------------------------------------
-   THE WEEK
-   `day` must be one of: Mon Tue Wed Thu Fri Sat Sun  (this drives the
-   "what's on tonight" logic — the site reads the real IST day and highlights it)
-   `status`: 'open' | 'filling' | 'closed'
-   -------------------------------------------------------------------------- */
-export const weekLabel = 'Week of 24 – 30 August'
-
-export const week = [
-  {
-    day: 'Wed',
-    long: 'Wednesday',
-    events: [
-      {
-        venue: 'baglami',
-        title: 'Ladies Night',
-        sub: 'Unlimited pours for women till midnight',
-        artist: 'DJ Rehan',
-        door: '20:00',
-        couple: '₹0',
-        stag: '₹1,500',
-        table: 'From ₹25,000',
-        status: 'filling',
-      },
-    ],
-  },
-  {
-    day: 'Thu',
-    long: 'Thursday',
-    events: [
-      {
-        venue: 'onrique',
-        title: 'Rooftop Sessions',
-        sub: 'Afro house until the roof closes',
-        artist: 'Guest — Ozean',
-        door: '19:30',
-        couple: '₹0 before 21:00',
-        stag: '₹1,200',
-        table: 'From ₹20,000',
-        status: 'filling',
-      },
-      {
-        venue: 'mercii',
-        title: 'Low Ceiling',
-        sub: 'Deep and tech house in the basement',
-        artist: 'Guest — SVMEER',
-        door: '21:00',
-        couple: '₹0 before 22:30',
-        stag: '₹1,500',
-        table: 'From ₹25,000',
-        status: 'open',
-      },
-    ],
-  },
-  {
-    day: 'Fri',
-    long: 'Friday',
-    events: [
-      {
-        venue: 'mercii',
-        title: 'MERCII Fridays',
-        sub: 'Dinner till 23:00, floor after',
-        artist: 'Resident — Anaya B',
-        door: '20:00',
-        couple: '₹0 before 22:00',
-        stag: '₹2,000',
-        table: 'From ₹35,000',
-        status: 'filling',
-      },
-      {
-        venue: 'baglami',
-        title: 'Bolly Drama',
-        sub: 'Two-hour dining slot, then the floor flips',
-        artist: 'DJ Rehan b2b Aftab',
-        door: '19:00',
-        couple: '₹0 before 21:30',
-        stag: '₹2,000',
-        table: 'From ₹40,000',
-        status: 'filling',
-      },
-    ],
-  },
-  {
-    day: 'Sat',
-    long: 'Saturday',
-    events: [
-      {
-        venue: 'bastian-beach',
-        title: 'Beach Club Saturday',
-        sub: 'Pool deck and indoor room, both running',
-        artist: 'Guest — Kohra',
-        door: '17:00',
-        couple: 'Cover ₹5,000 — we get it to ₹2,000',
-        stag: '₹3,000',
-        table: 'From ₹60,000',
-        status: 'filling',
-      },
-      {
-        venue: 'baglami',
-        title: 'Saturday Late',
-        sub: 'Third slot only — 23:00 entry',
-        artist: 'Open format',
-        door: '23:00',
-        couple: 'Guestlist only',
-        stag: 'Guestlist only',
-        table: 'Sold out',
-        status: 'closed',
-      },
-    ],
-  },
-  {
-    day: 'Sun',
-    long: 'Sunday',
-    events: [
-      {
-        venue: 'bastian-beach',
-        title: 'Sunday Sundowner',
-        sub: 'Doors at five, sunset set at seven',
-        artist: 'Resident — Kabir',
-        door: '17:00',
-        couple: 'Cover ₹3,000 — we get it to ₹1,200',
-        stag: '₹2,000',
-        table: 'From ₹45,000',
-        status: 'filling',
-      },
-    ],
   },
 ]
 

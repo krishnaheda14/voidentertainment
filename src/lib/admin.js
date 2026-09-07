@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react'
 import { brand as defaultBrand, week as defaultWeek, weekLabel as defaultWeekLabel } from '../data/site'
+import { ADMIN_HASH } from './adminHash'
 
 /* --------------------------------------------------------------------------
-   ADMIN GATE + LOCAL OVERRIDES
+   ADMIN GATE + LOCAL OVERRIDES + LIVE PUBLISH
 
-   This is a static site with no server, so "admin" works like this:
-   - The login only unlocks the editing panel in this browser. Credentials are
-     never stored in the code — only a SHA-256 hash of "id:password".
-   - Saved changes live in this browser's localStorage and override the
-     defaults from src/data/site.js on load. They are a live preview for the
-     admin; other visitors do not see them until the exported JSON is pasted
-     back into src/data/site.js and the site is redeployed.
+   The login only unlocks the editing panel in this browser. Credentials are
+   never stored in the code — only a SHA-256 hash of "id:password" (see
+   ./adminHash.js, shared with the API route that verifies it server-side).
+
+   Saving in the panel does two things:
+   1. Writes to this browser's localStorage — an instant local preview that
+      overrides the defaults from src/data/site.js on load.
+   2. Calls /api/save-content, a Vercel serverless function that commits the
+      change to src/data/content.json on GitHub (see api/save-content.js).
+      GitHub's push then triggers Vercel's normal auto-deploy, so the change
+      goes live for every visitor in roughly a minute — no manual redeploy.
 
    To change the credentials, run:
      node -e "const c=require('crypto');console.log(c.createHash('sha256').update('NEW_ID:NEW_PASSWORD').digest('hex'))"
-   and replace ADMIN_HASH with the output.
+   and replace the value in ./adminHash.js with the output.
    -------------------------------------------------------------------------- */
-
-const ADMIN_HASH =
-  '409bf2bfee78c822ed5acfe9c4557334f0ce744daef0bf01c1d847fc06cfc1f1'
 
 const SESSION_KEY = 'void.admin.session'
 export const OVERRIDES_KEY = 'void.admin.overrides'

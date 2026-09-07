@@ -21,7 +21,7 @@ Then read **DEPLOY-CLOUDFLARE.md** for hosting.
 
 ## 1. Before you launch — the one thing you must change
 
-Open **`src/data/site.js`** and put your real WhatsApp number in:
+Open **`src/data/content.json`** and put your real WhatsApp number in:
 
 ```js
 whatsapp: '919999999999',        // country code + number, digits only, no + and no spaces

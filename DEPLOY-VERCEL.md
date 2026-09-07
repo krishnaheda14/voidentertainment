@@ -61,7 +61,7 @@ Either way, it'll prompt you to sign into GitHub the first time.
    | Build command | `npm run build` |
    | Output directory | `dist` |
    | Install command | `npm install` |
-   | Environment variables | none needed — this is a static site, no server, no database |
+   | Environment variables | none needed to go live — only needed for the admin panel's "Publish live" button, see Part 3.5 |
 
 5. **Deploy.** The build log streams live; first build takes 1–2 minutes.
 
@@ -80,6 +80,31 @@ Cloudflare gets this from `public/_redirects`, which already ships with this rep
 ```
 
 This site is single-page (everything scrolls on one URL), so it's mostly future-proofing — but it means any link that ever points at a path other than `/` still resolves instead of 404ing.
+
+---
+
+## Part 3.5 — Turn on the admin panel's "Publish live" button
+
+The lock icon in the nav opens an admin panel (login form + a JSON editor for the weekly schedule and brand info). Saving there always previews instantly in that one browser. To make **Publish live** actually push the change to the real site for every visitor, it needs a small serverless function (`api/save-content.js`, already in this repo) that commits `src/data/content.json` to GitHub on your behalf — that commit is what triggers the normal Vercel rebuild.
+
+1. **Create a GitHub token.** GitHub → Settings → Developer settings → **Fine-grained personal access tokens** → Generate new token.
+   - Repository access: **Only select repositories** → `voidentertainment`.
+   - Permissions → **Contents: Read and write**. Nothing else needed.
+   - Copy the token now — GitHub only shows it once.
+2. **Add env vars in Vercel.** Project → Settings → Environment Variables:
+
+   | Name | Value |
+   |---|---|
+   | `GITHUB_TOKEN` | the token from step 1 |
+   | `GITHUB_REPO` | `krishnaheda14/voidentertainment` |
+   | `GITHUB_BRANCH` | `main` (optional — this is already the default) |
+
+   Add them to **Production** (and Preview, if you want it to work on preview deploys too).
+3. **Redeploy** once (Deployments → ⋯ → Redeploy) so the function picks up the new env vars.
+
+Without this, **Publish live** returns "Server is not configured to publish yet" — the local preview still works fine, it just won't reach GitHub.
+
+The credentials for the admin panel itself (the ID/password behind the lock icon) are set separately, as a hash in `src/lib/adminHash.js` — see the comment at the top of that file to change them.
 
 ---
 
