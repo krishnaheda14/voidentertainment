@@ -9,17 +9,59 @@ import {
 import { brand, venues } from '../data/site'
 import { cx, scrollToId, waLink } from '../lib/utils'
 import { useOverridableWeek } from '../lib/admin'
-import { Reveal, SectionHead, VoidButton } from './ui'
+import { Accordion, Reveal, SectionHead, VoidButton } from './ui'
 
 /* ==========================================================================
-   BOOKING COMPOSER
-   No backend, no database, no form service. It writes the WhatsApp message
-   for you and hands it to WhatsApp. Works on a static host, works offline
-   the moment the page is loaded, and nothing can silently fail to deliver.
+   BOOK — two big buttons straight to WhatsApp for the two things people
+   actually come here to do. The full message composer (venue, night,
+   headcount…) still exists, just tucked behind "Customize your message"
+   so it doesn't crowd the page for the people who just want to send it.
    ========================================================================== */
+export function Book() {
+  return (
+    <section id="book" className="relative scroll-mt-20 py-20 sm:py-28">
+      <div className="shell">
+        <SectionHead
+          eyebrow="Book · WhatsApp only"
+          title="Book a table or attend"
+          meta="One tap opens WhatsApp with the message started for you. You send it from your own number, so you have the thread and we have yours."
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <VoidButton
+            href={waLink('Hi Team Void — I want to book a table.')}
+            size="lg"
+            className="w-full"
+          >
+            <MessageCircle size={15} strokeWidth={2.5} />
+            Book a table
+          </VoidButton>
+          <VoidButton
+            href={waLink('Hi Team Void — I want to attend an event / guestlist entry.')}
+            size="lg"
+            variant="ghost"
+            className="w-full"
+          >
+            <MessageCircle size={15} strokeWidth={2.5} />
+            Attend an event
+          </VoidButton>
+        </div>
+
+        <Accordion
+          label="Customize your message"
+          meta="Pick the venue, night and headcount before it opens WhatsApp"
+          className="mt-6"
+        >
+          <BookComposer />
+        </Accordion>
+      </div>
+    </section>
+  )
+}
+
 const KINDS = ['Guestlist', 'Table', 'Private party']
 
-export function Book() {
+function BookComposer() {
   const { week } = useOverridableWeek()
   const [form, setForm] = useState(() => ({
     name: '',
@@ -51,15 +93,11 @@ export function Book() {
     'w-full border border-silver/15 bg-void-100 px-4 py-3.5 font-mono text-[13px] text-silver-hi outline-none transition-colors placeholder:text-silver-lo focus:border-flare'
 
   return (
-    <section id="book" className="relative scroll-mt-20 py-20 sm:py-28">
-      <div className="shell">
-        <SectionHead
-          eyebrow="Book · WhatsApp only"
-          title="Send it to the desk"
-          meta="Fill this in and it writes the message for you. You still send it yourself from your own WhatsApp, so you have the thread and we have your number."
-        />
-
-        <div className="grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
+    <>
+      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-silver-mid">
+        Fill this in and it writes the message for you. You still send it yourself from your own WhatsApp, so you have the thread and we have your number.
+      </p>
+      <div className="grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
           {/* the form */}
           <Reveal className="panel p-6 sm:p-8">
             <div className="grid gap-5">
@@ -261,9 +299,8 @@ export function Book() {
               </div>
             </Reveal>
           </div>
-        </div>
       </div>
-    </section>
+    </>
   )
 }
 

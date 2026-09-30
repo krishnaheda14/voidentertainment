@@ -9,6 +9,7 @@ import PastNights from './components/PastNights'
 import { Ticker, Ledger, Process } from './components/Strip'
 import { Book, Footer } from './components/Book'
 import AdminPanel from './components/AdminPanel'
+import { Accordion } from './components/ui'
 import { useSmoothScroll } from './lib/utils'
 
 export default function App() {
@@ -55,13 +56,23 @@ export default function App() {
 
       <main className="relative z-10">
         <Hero ready={!loading} />
-        <Ticker />
-        <Schedule />
-        <Ledger />
         <Venues />
-        <Process />
         <PastNights />
+        <Schedule />
         <Book />
+
+        <div className="shell pb-20 sm:pb-28">
+          <Accordion
+            label="More about Void"
+            meta="The numbers, how it works, the room-by-room ticker"
+          >
+            <div className="-mx-6 -mt-8 space-y-2 sm:-mx-8">
+              <Ticker />
+              <Ledger />
+              <Process />
+            </div>
+          </Accordion>
+        </div>
       </main>
 
       <Footer />

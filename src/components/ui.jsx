@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 import { cx } from '../lib/utils'
 
 /* -------------------------------------------------------------------------
@@ -207,6 +208,39 @@ export function Tilt({ children, className = '', max = 6 }) {
     >
       {children}
     </div>
+  )
+}
+
+/* -------------------------------------------------------------------------
+   Accordion — native <details>, so it works with zero JS and is keyboard
+   and screen-reader accessible for free. Used to tuck secondary content
+   (full venue list, numbers, how-it-works) behind a click so the page
+   reads short by default.
+   ------------------------------------------------------------------------- */
+export function Accordion({ label, meta, children, className = '', defaultOpen = false }) {
+  return (
+    <details
+      className={cx('group border border-silver/10', className)}
+      open={defaultOpen}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6">
+        <span>
+          <span className="metal block font-display text-[clamp(1.3rem,3.4vw,1.9rem)] leading-none">
+            {label}
+          </span>
+          {meta && (
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest2 text-silver-lo">
+              {meta}
+            </span>
+          )}
+        </span>
+        <ChevronDown
+          size={18}
+          className="shrink-0 text-silver-lo transition-transform duration-300 group-open:rotate-180 group-open:text-flare"
+        />
+      </summary>
+      <div className="border-t border-silver/10 px-6 py-8 sm:px-8">{children}</div>
+    </details>
   )
 }
 
