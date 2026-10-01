@@ -1,202 +1,192 @@
-# Admin panel — setup &amp; methodology
+# Setting up the admin panel — plain steps
 
-The site has a real admin login at **`/admin`** (not a modal — it's its own
-page, so you can bookmark it or hand the link to whoever runs the schedule).
-It lets you:
+Your site has a private page at **yoursite.com/admin**. From there you can:
 
-- Edit the weekly schedule, week label, and brand info (WhatsApp number,
-  Instagram, etc.) as JSON, and publish the change live.
-- Upload a venue photo or past-nights poster straight from the browser.
+- Change the weekly schedule, the brand info (WhatsApp number etc.), and the
+  "What it looks like" photo/video gallery.
+- Upload venue photos and gallery photos/videos.
+- See a running count of how many times the site has been opened.
 
-This document is the step-by-step for wiring the parts that need your own
-credentials — GitHub token, and (optionally) Cloudflare KV/R2 if you want to
-go beyond the default setup.
-
----
-
-## Part 0 — How it actually works (read this first)
-
-There is no database. Two publish paths exist, shipped and ready:
-
-| | Where it runs | What it does |
-|---|---|---|
-| `api/save-content.js`, `api/upload-image.js` | Vercel (serverless functions) | Commits straight to GitHub |
-| `functions/api/save-content.js`, `functions/api/upload-image.js` | Cloudflare Pages (Pages Functions) | Same thing, Cloudflare's function syntax |
-
-Both do the identical job: verify the admin login server-side, then use the
-**GitHub Contents API** to commit the change — `src/data/content.json` for
-schedule/brand, `public/media/...` for photos. That git push is what
-triggers your host's normal auto-deploy (Vercel or Cloudflare Pages), so the
-change goes live for every visitor in about a minute. No KV, no R2, no extra
-account needed beyond GitHub — **this is the part that's already built and
-works today**, on whichever host you deploy to.
-
-Cloudflare KV and R2 (Part 3 below) are an **optional upgrade**: swap the
-GitHub-commit step for direct storage writes, so a save is live instantly
-with no git commit and no redeploy. Use it if a 1–2 minute publish delay
-actually bothers you; skip it otherwise — the default is simpler to operate
-and good enough for a weekly schedule update.
+To make all of that actually go live on the real website, you need to do
+**two short setup jobs, once.** This page walks through both, in order.
+Total time: about 10 minutes.
 
 ---
 
-## Part 1 — Credentials
+## What you need before you start
 
-### The admin login (ID + password)
+- A **GitHub account** with this project's code already on it (you have
+  this already, since that's how you deploy).
+- A **Cloudflare account**, with this site already set up as a Cloudflare
+  Pages project (this is what makes your site live on the internet).
 
-Stored as a single SHA-256 hash in `src/lib/adminHash.js`, never the
-plaintext. To set your own:
-
-```bash
-node -e "const c=require('crypto');console.log(c.createHash('sha256').update('YOUR_ID:YOUR_PASSWORD').digest('hex'))"
-```
-
-Paste the output into `src/lib/adminHash.js` as `ADMIN_HASH`, commit, push.
-Both the browser login check and every server function import this same
-constant, so there's exactly one place to change it.
-
-### The GitHub token (lets the functions publish on your behalf)
-
-1. GitHub → your avatar → **Settings** → **Developer settings** → **Personal
-   access tokens** → **Fine-grained tokens** → **Generate new token**.
-2. **Repository access** → **Only select repositories** → pick this repo.
-3. **Permissions** → **Repository permissions** → **Contents** → **Read and
-   write**. Nothing else needed.
-4. Generate, copy the token now (GitHub shows it once).
-
-You'll set this as an env var in Part 2.
+If you deploy on Vercel instead of Cloudflare, skip to **Part 3** — you
+only need the GitHub token, not the Cloudflare KV part.
 
 ---
 
-## Part 2 — Turn on publishing (GitHub-commit path, default)
+## Part 1 — Get a GitHub token
 
-Pick whichever host you actually deploy to — you only need one.
+This token lets the admin panel save your photo/video uploads back into
+your GitHub project automatically, so they show up on the live site.
 
-### On Vercel
+1. Go to **github.com** and log in.
+2. Click your profile picture in the top-right corner → **Settings**.
+3. Scroll all the way down the left-hand menu → click **Developer settings**
+   (it's near the bottom, below "Code security").
+4. Click **Personal access tokens** → **Fine-grained tokens**.
+5. Click the green **Generate new token** button.
+6. Fill in the form:
+   - **Token name**: anything you like, e.g. `void-admin`.
+   - **Expiration**: pick something like 1 year (you can make a new one
+     later if it expires).
+   - **Repository access**: choose **Only select repositories**, then pick
+     your `voidentertainment` repository from the list.
+   - Scroll down to **Permissions** → **Repository permissions** → find
+     **Contents** → change it from "No access" to **Read and write**.
+     Leave everything else as is.
+7. Scroll down and click **Generate token**.
+8. **Copy the token now.** It's a long string starting with `github_pat_`.
+   GitHub only shows it to you this one time — if you lose it, you'll just
+   generate a new one.
 
-Project → **Settings** → **Environment Variables**:
+Keep this somewhere safe for a minute — you'll paste it into Cloudflare
+next.
 
-| Name | Value |
+---
+
+## Part 2 — Turn on live updates and the photo counter (Cloudflare KV)
+
+"KV" is just Cloudflare's name for a simple storage box. You need **one**
+of these. It's used for two things: holding your live schedule/gallery
+content, and counting page views.
+
+### 2.1 — Create the storage box
+
+1. Go to **dash.cloudflare.com** and log in.
+2. In the left sidebar, find **Storage & Databases** → click **KV**.
+3. Click **Create a namespace**.
+4. Name it `void-content` (or anything you'll recognize) → **Add**.
+
+### 2.2 — Connect it to your website
+
+1. Go to **Workers & Pages** in the left sidebar → click on your Pages
+   project (the one running this site).
+2. Click **Settings** → **Functions**.
+3. Scroll to **KV namespace bindings** → click **Add binding**.
+4. Fill in:
+   - **Variable name**: `CONTENT_KV` (type it exactly like this — capital
+     letters, underscore)
+   - **KV namespace**: pick the `void-content` one you just made.
+5. Click **Save**.
+
+### 2.3 — Add your GitHub token here too
+
+Still in **Settings** → on the left, click **Environment variables**.
+
+1. Click **Add variable** and add:
+   - Name: `GITHUB_TOKEN` — Value: the token you copied in Part 1.
+   - Click **Encrypt** on this one, since it's a secret.
+2. Click **Add variable** again and add:
+   - Name: `GITHUB_REPO` — Value: `yourusername/voidentertainment` (replace
+     with your actual GitHub username/repo — check the URL of your repo on
+     github.com if unsure).
+3. Save.
+
+### 2.4 — Redeploy once
+
+Go to the **Deployments** tab of your Pages project → click the **⋯** menu
+on the latest deployment → **Retry deployment** (or just push any small
+change to GitHub — either triggers a fresh deploy that picks up what you
+just set).
+
+That's it for setup. From now on:
+
+- **Schedule and gallery changes** you publish from `/admin` show up on
+  the live site within a few seconds (no waiting for a rebuild) — they're
+  being saved straight into the KV storage box.
+- **The view counter** at the bottom of the site starts counting
+  automatically, using that same storage box.
+- **Photos and videos** you upload from `/admin` get saved into your
+  GitHub project (using the token from Part 1), which triggers a normal
+  rebuild — they appear on the live site in about a minute.
+
+---
+
+## Part 3 — If you're on Vercel instead of Cloudflare
+
+Everything in Part 2 is Cloudflare-specific (KV doesn't exist on Vercel).
+On Vercel, schedule/gallery publishing works a different way: it saves
+straight into your GitHub project too (same as photos), and a normal
+rebuild puts it live in about a minute. The view counter won't work on
+Vercel — that part only runs on Cloudflare.
+
+1. Go to your project on **vercel.com** → **Settings** → **Environment
+   Variables**.
+2. Add `GITHUB_TOKEN` (the token from Part 1) and `GITHUB_REPO`
+   (`yourusername/voidentertainment`).
+3. Redeploy once.
+
+---
+
+## Part 4 — Using the admin panel day to day
+
+1. Go to **yoursite.com/admin**.
+2. Log in with the ID and password (see "Changing your login" below if you
+   don't have one set yet).
+3. On the left: a box of text (JSON) with your schedule, brand info, and
+   gallery. Edit the parts you need, then:
+   - **Publish live** — pushes the change to the real site.
+   - **Preview only** — just shows it to you in this browser first, so you
+     can check it looks right before publishing.
+4. On the right: upload a photo or video.
+   - Pick what it's for (which venue, or a gallery photo/video).
+   - Choose the file from your computer.
+   - Click **Upload**.
+   - For a venue photo, you're done — it appears automatically.
+   - For a gallery photo/video, copy the path it shows you, then paste it
+     into that item's `poster` or `video` field in the box on the left, and
+     publish.
+   - **For a video longer than a few seconds**, upload it to YouTube
+     instead (as "Unlisted" if you don't want it public) and paste the
+     video's ID into the `youtube` field — this works far better than
+     uploading the raw video file.
+
+### Changing your login
+
+1. Open a terminal on your computer, in the project folder.
+2. Run this, replacing `YOUR_ID` and `YOUR_PASSWORD`:
+   ```bash
+   node -e "const c=require('crypto');console.log(c.createHash('sha256').update('YOUR_ID:YOUR_PASSWORD').digest('hex'))"
+   ```
+3. It prints a long string of letters and numbers. Copy it.
+4. Open `src/lib/adminHash.js`, replace the value there with what you
+   copied, save, commit, and push.
+
+---
+
+## Troubleshooting
+
+| What you see | What it means |
 |---|---|
-| `GITHUB_TOKEN` | the token from Part 1 |
-| `GITHUB_REPO` | `krishnaheda14/voidentertainment` |
-| `GITHUB_BRANCH` | `main` (optional, this is already the default) |
-
-Add to **Production** (and Preview, if you want `/admin` to publish from
-preview deploys too). Redeploy once so the functions pick them up.
-
-### On Cloudflare Pages
-
-Project → **Settings** → **Environment variables** (or via Wrangler):
-
-```bash
-npx wrangler pages secret put GITHUB_TOKEN --project-name=void-entertainment
-# paste the token when prompted
-```
-
-Then add `GITHUB_REPO` (and optionally `GITHUB_BRANCH`) the same way, either
-via `wrangler pages secret put` or the dashboard's environment variables
-screen. Redeploy once.
-
-That's it — `/admin` now works identically on either host. **Publish live**
-commits to GitHub, the host redeploys, done.
-
----
-
-## Part 3 — Advanced: Cloudflare KV + R2 (instant, no git commit)
-
-Skip this unless you specifically want saves to go live without waiting for
-a redeploy. It replaces the GitHub-commit step with direct writes to
-Cloudflare's own storage — only works if you're deploying on **Cloudflare
-Pages** (KV/R2 bindings are a Cloudflare-specific feature, not available on
-Vercel).
-
-### 3.1 — Create a KV namespace (for schedule/brand content)
-
-```bash
-npx wrangler kv namespace create CONTENT_KV
-```
-
-This prints a `namespace id`. Bind it to the Pages project:
-
-Project → **Settings** → **Functions** → **KV namespace bindings** → **Add
-binding**: variable name `CONTENT_KV`, namespace = the one you just created.
-(Or add it to `wrangler.toml` under `[[kv_namespaces]]` if you deploy via
-Wrangler CLI rather than the dashboard.)
-
-### 3.2 — Create an R2 bucket (for uploaded photos)
-
-```bash
-npx wrangler r2 bucket create void-media
-```
-
-Project → **Settings** → **Functions** → **R2 bucket bindings** → **Add
-binding**: variable name `MEDIA_BUCKET`, bucket = `void-media`. Then turn on
-**public access** for the bucket (R2 → your bucket → Settings → Public
-access) so uploaded images are reachable by URL, and note the public base
-URL it gives you (either `pub-<hash>.r2.dev` or a custom domain you attach).
-
-### 3.3 — Swap the function bodies
-
-Replace the GitHub-commit section of `functions/api/save-content.js` with a
-KV write:
-
-```js
-// instead of the GitHub fetch/PUT block:
-await env.CONTENT_KV.put('content', JSON.stringify({ weekLabel, week, brand }))
-return json({ ok: true })
-```
-
-And add a matching read endpoint, `functions/api/content.js`:
-
-```js
-export async function onRequestGet({ env }) {
-  const value = await env.CONTENT_KV.get('content')
-  if (!value) return new Response('Not found', { status: 404 })
-  return new Response(value, { headers: { 'Content-Type': 'application/json' } })
-}
-```
-
-For images, replace the GitHub-commit section of
-`functions/api/upload-image.js` with an R2 put:
-
-```js
-const bytes = Uint8Array.from(atob(contentBase64), (c) => c.charCodeAt(0))
-await env.MEDIA_BUCKET.put(cleanPath, bytes, {
-  httpMetadata: { contentType: 'image/jpeg' },
-})
-return json({ ok: true, path: `https://pub-<your-hash>.r2.dev/${cleanPath}` })
-```
-
-### 3.4 — Point the site at live content instead of the bundled JSON
-
-This is the part that makes it instant: right now `src/data/site.js` imports
-`content.json` at **build time**, so even a KV write needs a rebuild to show
-up unless the frontend also fetches it at **runtime**. In `src/lib/admin.js`,
-add a fetch of `/api/content` on load and feed its result into the same
-`readWeek`/`readBrand` functions as a new base layer, underneath the
-existing localStorage preview override. This is a real code change, not just
-config — happy to wire it up if you decide to go this route, since it
-touches how `week`/`weekLabel`/`brand` are read throughout the app.
-
-### 3.5 — Why this repo doesn't ship with KV/R2 wired in by default
-
-Two storage systems (GitHub commit vs. KV/R2) for the same data adds a real
-architecture fork — which one is "true," what happens if they disagree,
-double the moving parts to debug. The GitHub-commit path in Part 2 is
-simpler to reason about, free, needs nothing beyond a token you already have
-to manage, and a 1–2 minute publish delay is a non-issue for a weekly club
-schedule. Reach for Part 3 only if that delay is a real problem for you.
+| "Server is not configured to publish yet" | Part 1/2 (or Part 3 on Vercel) isn't finished — double check the token and variable names are typed exactly right. |
+| Publish works but the site doesn't change | On Cloudflare, check the `CONTENT_KV` binding name is exactly that. On either host, hard-refresh the page (Ctrl/Cmd + Shift + R). |
+| Photo upload fails with "too large" | Keep photos under 8MB and videos under 20MB. For longer videos, use YouTube instead (see Part 4). |
+| View counter doesn't show up | That only works on Cloudflare with Part 2 done — it stays hidden everywhere else, which is normal. |
+| Wrong ID or password | Check `src/lib/adminHash.js` — see "Changing your login" above. |
 
 ---
 
 ## Quick reference
 
 ```
-Admin URL ................. yoursite.com/admin
-Change credentials ........ src/lib/adminHash.js (see Part 1)
-Publish mechanism (default) GitHub Contents API commit → host auto-redeploy
-Required env vars ......... GITHUB_TOKEN, GITHUB_REPO (GITHUB_BRANCH optional)
-Set on Vercel .............. Project → Settings → Environment Variables
-Set on Cloudflare Pages .... wrangler pages secret put, or dashboard
-Advanced (optional) ....... Cloudflare KV (content) + R2 (images) — Part 3
+Admin page ................ yoursite.com/admin
+GitHub token ............... github.com → your profile → Settings →
+                              Developer settings → Personal access tokens →
+                              Fine-grained tokens
+Cloudflare KV storage ...... dash.cloudflare.com → Storage & Databases → KV
+Connect KV to your site .... Workers & Pages → your project → Settings →
+                              Functions → KV namespace bindings
+Env vars (either host) ..... GITHUB_TOKEN, GITHUB_REPO
+Change login ............... src/lib/adminHash.js
 ```

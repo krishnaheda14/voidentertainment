@@ -2,28 +2,21 @@ import { ADMIN_HASH } from '../../src/lib/adminHash.js'
 
 /* --------------------------------------------------------------------------
    POST /api/save-content — Cloudflare Pages Functions version.
+   Body: { id, password, weekLabel, week, brand, pastNights }
 
-   Same job as api/save-content.js (the Vercel version): re-verify the admin
-   login server-side, then commit the edited content.json straight to GitHub
-   via the Contents API. GitHub's push is what triggers Cloudflare Pages'
-   normal auto-deploy — this file needs no KV or R2 to work.
+   Unlike the Vercel version (api/save-content.js, which commits to
+   GitHub), this one writes straight to a Cloudflare KV namespace. That
+   means a publish is live for every visitor within seconds — no git
+   commit, no rebuild. functions/api/content.js is the matching read side
+   that the site fetches on load (see src/lib/admin.js).
 
-   File-based routing: Cloudflare Pages turns
-   functions/api/save-content.js into the route /api/save-content
-   automatically — same URL the admin page calls on either host.
-
-   Requires these on the Cloudflare Pages project (Settings → Environment
-   variables, or `wrangler pages secret put`):
-     GITHUB_TOKEN   — a fine-grained PAT with Contents: Read and write on this repo
-     GITHUB_REPO    — "owner/repo", e.g. "krishnaheda14/voidentertainment"
-     GITHUB_BRANCH  — optional, defaults to "main"
-
-   See ADMIN-SETUP.md for the full walkthrough, including the alternative
-   Cloudflare KV / R2 path for people who want to skip GitHub entirely.
+   Requires a KV namespace bound as CONTENT_KV on the Cloudflare Pages
+   project (Settings → Functions → KV namespace bindings). See
+   ADMIN-SETUP.md for the exact clicks.
    -------------------------------------------------------------------------- */
 
 const DAY_CODES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const CONTENT_PATH = 'src/data/content.json'
+const CONTENT_KEY = 'content'
 
 async function sha256Hex(input) {
   const data = new TextEncoder().encode(input)
@@ -64,7 +57,7 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null)
   if (!body) return json({ error: 'Invalid JSON body' }, 400)
 
-  const { id, password, weekLabel, week, brand } = body
+  const { id, password, weekLabel, week, brand, pastNights } = body
 
   if (typeof id !== 'string' || typeof password !== 'string') {
     return json({ error: 'Missing id or password' }, 400)
@@ -79,62 +72,29 @@ export async function onRequestPost({ request, env }) {
   if (!brand || typeof brand !== 'object' || Array.isArray(brand)) {
     return json({ error: 'brand must be an object' }, 400)
   }
+  if (!Array.isArray(pastNights)) {
+    return json({ error: 'pastNights must be an array (can be empty)' }, 400)
+  }
   try {
     validateWeek(week)
   } catch (err) {
     return json({ error: err.message }, 400)
   }
 
-  const token = env.GITHUB_TOKEN
-  const repo = env.GITHUB_REPO
-  const branch = env.GITHUB_BRANCH || 'main'
-
-  if (!token || !repo) {
+  if (!env.CONTENT_KV) {
     return json(
       {
         error:
-          'Server is not configured to publish yet — set GITHUB_TOKEN and GITHUB_REPO on the Cloudflare Pages project.',
+          'Server is not configured to publish yet — bind a KV namespace as CONTENT_KV on the Cloudflare Pages project.',
       },
       500
     )
   }
 
-  const api = `https://api.github.com/repos/${repo}/contents/${CONTENT_PATH}`
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'void-entertainment-admin',
-  }
-
   try {
-    const getRes = await fetch(`${api}?ref=${branch}`, { headers })
-    if (!getRes.ok) {
-      const bodyText = await getRes.text()
-      throw new Error(`Could not read current content.json from GitHub (${getRes.status}): ${bodyText}`)
-    }
-    const current = await getRes.json()
-
-    const newContent = JSON.stringify({ weekLabel, week, brand }, null, 2) + '\n'
-
-    const putRes = await fetch(api, {
-      method: 'PUT',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: `Admin update via website — ${new Date().toISOString()}`,
-        content: btoa(unescape(encodeURIComponent(newContent))),
-        sha: current.sha,
-        branch,
-      }),
-    })
-
-    if (!putRes.ok) {
-      const bodyText = await putRes.text()
-      throw new Error(`GitHub rejected the commit (${putRes.status}): ${bodyText}`)
-    }
-
+    await env.CONTENT_KV.put(CONTENT_KEY, JSON.stringify({ weekLabel, week, brand, pastNights }))
     return json({ ok: true })
   } catch (err) {
-    return json({ error: err.message || 'Failed to publish to GitHub' }, 502)
+    return json({ error: err.message || 'Failed to save to KV' }, 502)
   }
 }

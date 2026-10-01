@@ -11,7 +11,7 @@ import { ADMIN_HASH } from '../../src/lib/adminHash.js'
    body of this function that uploads to an R2 bucket binding instead.
    -------------------------------------------------------------------------- */
 
-const MAX_BYTES = 8 * 1024 * 1024
+const MAX_BYTES = 20 * 1024 * 1024 // 20MB — covers photos and a short clip
 
 async function sha256Hex(input) {
   const data = new TextEncoder().encode(input)
@@ -64,7 +64,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Missing file content' }, 400)
   }
   if (base64ByteLength(contentBase64) > MAX_BYTES) {
-    return json({ error: 'File is too large — keep it under 8MB' }, 400)
+    return json({ error: 'File is too large — keep it under 20MB (use YouTube for longer clips)' }, 400)
   }
 
   const token = env.GITHUB_TOKEN

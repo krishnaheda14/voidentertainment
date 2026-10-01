@@ -144,3 +144,26 @@ export function useMediaQuery(query) {
 }
 
 export const cx = (...a) => a.filter(Boolean).join(' ')
+
+/* --------------------------------------------------------------------------
+   VIEW COUNT — Cloudflare-only (functions/api/view-count.js). Fires once
+   per page load; on any other host (or before a KV namespace is bound) the
+   endpoint 404s/network-errors and this just stays null, so callers should
+   render nothing until it resolves rather than showing a "0".
+   -------------------------------------------------------------------------- */
+export function useViewCount() {
+  const [count, setCount] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/view-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.count === 'number') setCount(data.count)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  return count
+}

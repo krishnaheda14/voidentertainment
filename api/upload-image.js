@@ -14,7 +14,8 @@ import { ADMIN_HASH } from '../src/lib/adminHash.js'
    vars as api/save-content.js), which is what triggers Vercel's redeploy.
    -------------------------------------------------------------------------- */
 
-const MAX_BYTES = 8 * 1024 * 1024 // 8MB — plenty for a compressed JPG/PNG
+const MAX_BYTES = 20 * 1024 * 1024 // 20MB — covers photos and a short clip; see ADMIN-SETUP.md for
+// a note on Vercel's own request-size limit, which can be lower than this on some plans.
 
 function sha256Hex(input) {
   return createHash('sha256').update(input).digest('hex')
@@ -60,7 +61,7 @@ export default async function handler(req, res) {
     return
   }
   if (Buffer.byteLength(contentBase64, 'base64') > MAX_BYTES) {
-    res.status(400).json({ error: 'File is too large — keep it under 8MB' })
+    res.status(400).json({ error: 'File is too large — keep it under 20MB (use YouTube for longer clips)' })
     return
   }
 

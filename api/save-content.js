@@ -3,7 +3,7 @@ import { ADMIN_HASH } from '../src/lib/adminHash.js'
 
 /* --------------------------------------------------------------------------
    POST /api/save-content
-   Body: { id, password, weekLabel, week, brand }
+   Body: { id, password, weekLabel, week, brand, pastNights }
 
    Verifies the same id/password the admin panel logged in with (server-side,
    so the write can't be forged just by knowing the client-side session flag),
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     return
   }
 
-  const { id, password, weekLabel, week, brand } = req.body || {}
+  const { id, password, weekLabel, week, brand, pastNights } = req.body || {}
 
   if (typeof id !== 'string' || typeof password !== 'string') {
     res.status(400).json({ error: 'Missing id or password' })
@@ -68,6 +68,10 @@ export default async function handler(req, res) {
   }
   if (!brand || typeof brand !== 'object' || Array.isArray(brand)) {
     res.status(400).json({ error: 'brand must be an object' })
+    return
+  }
+  if (!Array.isArray(pastNights)) {
+    res.status(400).json({ error: 'pastNights must be an array (can be empty)' })
     return
   }
   try {
@@ -104,7 +108,7 @@ export default async function handler(req, res) {
     }
     const current = await getRes.json()
 
-    const newContent = JSON.stringify({ weekLabel, week, brand }, null, 2) + '\n'
+    const newContent = JSON.stringify({ weekLabel, week, brand, pastNights }, null, 2) + '\n'
 
     const putRes = await fetch(api, {
       method: 'PUT',

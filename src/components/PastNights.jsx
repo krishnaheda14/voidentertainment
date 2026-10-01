@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Play, X, Instagram } from 'lucide-react'
-import { pastNights, brand } from '../data/site'
+import { brand } from '../data/site'
 import { cx } from '../lib/utils'
+import { useOverridablePastNights } from '../lib/admin'
 import { Reveal, SectionHead, SmartImage, VoidButton } from './ui'
 
 const SPAN = {
@@ -96,6 +97,7 @@ function Lightbox({ item, onClose }) {
 
 export default function PastNights() {
   const [open, setOpen] = useState(null)
+  const pastNights = useOverridablePastNights()
 
   return (
     <section id="nights" className="relative scroll-mt-20 py-20 sm:py-28">

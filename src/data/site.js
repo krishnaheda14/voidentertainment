@@ -157,59 +157,15 @@ export const venues = [
 ]
 
 /* --------------------------------------------------------------------------
-   PAST NIGHTS — video + photo wall
-   For each item you can supply EITHER:
+   PAST NIGHTS — video + photo wall. Lives in ./content.json now too, same
+   as brand/weekLabel/week — the admin panel's "What it looks like" editor
+   and photo/video uploader both write here. For each item you can supply
+   EITHER:
      youtube: 'VIDEO_ID'        (from https://youtube.com/watch?v=VIDEO_ID)
      OR video: '/media/videos/your-file.mp4'
    `poster` is the still frame. Missing files fall back to a gradient tile.
    -------------------------------------------------------------------------- */
-export const pastNights = [
-  {
-    title: 'New Year 2026',
-    venue: 'Bastian Beach Club',
-    meta: '600 guests · sold out in 4 days',
-    poster: '/media/gallery/nye-bastian.jpg',
-    youtube: '',
-    video: '',
-    span: 'wide',
-  },
-  {
-    title: 'Rooftop Sessions 012',
-    venue: 'Onrique',
-    meta: 'Afro house · roof at capacity',
-    poster: '/media/gallery/onrique-012.jpg',
-    youtube: '',
-    video: '',
-    span: 'tall',
-  },
-  {
-    title: 'Bolly Drama',
-    venue: 'Bağlami',
-    meta: 'Three slots, all flipped',
-    poster: '/media/gallery/baglami-bolly.jpg',
-    youtube: '',
-    video: '',
-    span: 'normal',
-  },
-  {
-    title: 'Low Ceiling 007',
-    venue: 'MERCII',
-    meta: 'Basement, tech house, 3am close',
-    poster: '/media/gallery/mercii-low.jpg',
-    youtube: '',
-    video: '',
-    span: 'wide',
-  },
-  {
-    title: 'Holi Sundowner',
-    venue: 'Bastian Beach Club',
-    meta: 'Pool deck takeover',
-    poster: '/media/gallery/holi-bastian.jpg',
-    youtube: '',
-    video: '',
-    span: 'normal',
-  },
-]
+export const pastNights = content.pastNights
 
 export const stats = [
   { value: '10+', label: 'Venues', note: 'All over Mumbai' },

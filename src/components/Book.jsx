@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import {
   ArrowUp,
+  Eye,
   Instagram,
   Mail,
   MessageCircle,
   Phone,
 } from 'lucide-react'
 import { brand, venues } from '../data/site'
-import { cx, scrollToId, waLink } from '../lib/utils'
+import { cx, scrollToId, useViewCount, waLink } from '../lib/utils'
 import { useOverridableWeek } from '../lib/admin'
 import { Accordion, Reveal, SectionHead, VoidButton } from './ui'
 
@@ -304,6 +305,18 @@ function BookComposer() {
   )
 }
 
+/* Quiet little view counter — Cloudflare KV only (see useViewCount). Shows
+   nothing until it resolves, and stays hidden entirely off Cloudflare. */
+function ViewCount() {
+  const count = useViewCount()
+  if (count === null) return null
+  return (
+    <span className="flex items-center gap-1.5">
+      <Eye size={11} /> {count.toLocaleString()} views
+    </span>
+  )
+}
+
 /* ==========================================================================
    FOOTER
    ========================================================================== */
@@ -353,7 +366,10 @@ export function Footer() {
             © {new Date().getFullYear()} {brand.full} · {brand.city}
           </span>
           <span>Drink responsibly · 21+ at every venue</span>
-          <span>{brand.domain}</span>
+          <span className="flex items-center gap-4">
+            <ViewCount />
+            {brand.domain}
+          </span>
         </div>
       </div>
     </footer>

@@ -4,6 +4,7 @@ import {
   week as defaultWeek,
   weekLabel as defaultWeekLabel,
   brand as defaultBrand,
+  pastNights as defaultPastNights,
   venues,
 } from '../data/site'
 import {
@@ -16,6 +17,7 @@ import {
   clearOverrides,
   notifyDataChanged,
   validateWeek,
+  validatePastNights,
 } from '../lib/admin'
 import { VoidButton } from './ui'
 import logo from '../data/logo-mark.png'
@@ -27,6 +29,7 @@ function currentOverridesJson() {
       weekLabel: (o && o.weekLabel) || defaultWeekLabel,
       week: (o && o.week) || defaultWeek,
       brand: { ...defaultBrand, ...(o && o.brand ? o.brand : {}) },
+      pastNights: (o && o.pastNights) || defaultPastNights,
     },
     null,
     2
@@ -198,6 +201,7 @@ function ContentEditor({ creds }) {
     }
     try {
       validateWeek(parsed.week)
+      validatePastNights(parsed.pastNights)
     } catch (err) {
       setError(err.message)
       return null
@@ -246,12 +250,13 @@ function ContentEditor({ creds }) {
 
   return (
     <section className="border border-silver/15 bg-void-100 p-6 sm:p-8">
-      <h2 className="metal mb-1 font-display text-2xl">Schedule &amp; brand</h2>
+      <h2 className="metal mb-1 font-display text-2xl">Schedule, brand &amp; gallery</h2>
       <p className="mb-4 text-xs leading-relaxed text-silver-mid">
-        Edit <code className="text-silver-hi">weekLabel</code>, <code className="text-silver-hi">week</code> and{' '}
-        <code className="text-silver-hi">brand</code> as JSON. <strong className="text-silver-hi">Publish live</strong>{' '}
-        commits this straight to GitHub, which redeploys the site for everyone in about a minute.{' '}
-        <strong className="text-silver-hi">Preview only</strong> just previews it in this browser.
+        Edit <code className="text-silver-hi">weekLabel</code>, <code className="text-silver-hi">week</code>,{' '}
+        <code className="text-silver-hi">brand</code> and <code className="text-silver-hi">pastNights</code> (the
+        "What it looks like" gallery) as JSON. <strong className="text-silver-hi">Publish live</strong> pushes this
+        to the real site for every visitor. <strong className="text-silver-hi">Preview only</strong> just previews
+        it in this browser.
       </p>
       <textarea
         value={text}
@@ -268,12 +273,13 @@ function ContentEditor({ creds }) {
       )}
       {!error && status === 'publishing' && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-silver-mid">
-          <UploadCloud size={13} className="animate-pulse" /> Publishing to GitHub…
+          <UploadCloud size={13} className="animate-pulse" /> Publishing…
         </p>
       )}
       {!error && status === 'published' && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
-          <Check size={13} /> Published. Live for everyone in ~1–2 minutes.
+          <Check size={13} /> Published — live on Cloudflare in seconds, or within ~1–2 minutes if this
+          site publishes via GitHub.
         </p>
       )}
 
@@ -293,21 +299,25 @@ function ContentEditor({ creds }) {
 }
 
 /* ==========================================================================
-   IMAGE UPLOADER
-   Picks a photo, commits it straight to the exact /public/media path the
-   site already expects (same GitHub publish pipeline as the content
-   editor above) — so for a venue photo, nothing else needs to change for
-   it to appear. For a gallery poster, the filename still needs adding to
-   `pastNights` in the content editor above (or src/data/site.js by hand).
+   IMAGE / VIDEO UPLOADER
+   Picks a photo or a short video, commits it straight to the exact
+   /public/media path the site already expects (same GitHub publish
+   pipeline as the content editor above) — so for a venue photo, nothing
+   else needs to change for it to appear. For a gallery poster or video,
+   the filename still needs adding to `pastNights` in the editor above (or
+   src/data/site.js by hand) — paste the path this prints into that
+   item's `poster` or `video` field.
    ========================================================================== */
 const TARGETS = [
   ...venues.map((v) => ({
     value: `venue:${v.slug}`,
     label: `${v.name} — venue photo`,
     path: `media/venues/${v.slug}`,
+    kind: 'image',
   })),
-  { value: 'gallery', label: 'Past nights — gallery poster', path: 'media/gallery/' },
-  { value: 'custom', label: 'Custom path (advanced)', path: '' },
+  { value: 'gallery-photo', label: 'Past nights — gallery poster (photo)', path: 'media/gallery/', kind: 'image' },
+  { value: 'gallery-video', label: 'Past nights — gallery clip (video)', path: 'media/videos/', kind: 'video' },
+  { value: 'custom', label: 'Custom path (advanced)', path: '', kind: 'any' },
 ]
 
 function fileToBase64(file) {
@@ -329,13 +339,16 @@ function ImageUploader({ creds }) {
   const [result, setResult] = useState(null)
 
   const selected = TARGETS.find((t) => t.value === target)
-  const ext = file?.name.match(/\.(jpe?g|png|webp)$/i)?.[0]?.toLowerCase() || '.jpg'
+  const needsFilename = target === 'gallery-photo' || target === 'gallery-video'
+  const defaultExt = selected.kind === 'video' ? '.mp4' : '.jpg'
+  const ext =
+    file?.name.match(/\.(jpe?g|png|webp|mp4|mov|webm)$/i)?.[0]?.toLowerCase() || defaultExt
 
   const resolvedPath = (() => {
     if (target === 'custom') return customPath.replace(/^\/+/, '')
-    if (target === 'gallery') {
+    if (needsFilename) {
       const safe = filename.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
-      return safe ? `media/gallery/${safe}${ext}` : ''
+      return safe ? `${selected.path}${safe}${ext}` : ''
     }
     return `${selected.path}${ext}`
   })()
@@ -348,7 +361,7 @@ function ImageUploader({ creds }) {
       return
     }
     if (!resolvedPath) {
-      setError(target === 'gallery' ? 'Give the poster a file name.' : 'Give it a path.')
+      setError(needsFilename ? 'Give it a file name.' : 'Give it a path.')
       return
     }
     setBusy(true)
@@ -372,13 +385,13 @@ function ImageUploader({ creds }) {
   return (
     <section className="h-fit border border-silver/15 bg-void-100 p-6 sm:p-8">
       <h2 className="metal mb-1 flex items-center gap-2 font-display text-2xl">
-        <ImageIcon size={18} className="text-flare" /> Photos
+        <ImageIcon size={18} className="text-flare" /> Photos &amp; videos
       </h2>
       <p className="mb-4 text-xs leading-relaxed text-silver-mid">
         Uploads commit straight to GitHub too, under <code className="text-silver-hi">public/media</code>. A
-        venue photo appears immediately — the site already points at that exact path. A gallery poster also
-        needs its filename added to <code className="text-silver-hi">pastNights</code> in the editor on the
-        left.
+        venue photo appears immediately — the site already points at that exact path. A gallery photo or
+        video also needs its path pasted into the matching item's <code className="text-silver-hi">poster</code>{' '}
+        or <code className="text-silver-hi">video</code> field in the editor on the left.
       </p>
 
       <div className="grid gap-4">
@@ -399,7 +412,15 @@ function ImageUploader({ creds }) {
           </select>
         </div>
 
-        {target === 'gallery' && (
+        {target === 'gallery-video' && (
+          <p className="border border-flare/30 bg-void-000 p-3 font-mono text-[10px] leading-relaxed text-silver-mid">
+            For anything longer than a few seconds, upload it to YouTube (unlisted is fine) instead and
+            paste the video ID into that item's <code className="text-silver-hi">youtube</code> field in the
+            editor — no upload needed, and it plays far more reliably than a self-hosted file.
+          </p>
+        )}
+
+        {needsFilename && (
           <div>
             <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest2 text-silver-lo">
               File name
@@ -429,11 +450,21 @@ function ImageUploader({ creds }) {
 
         <div>
           <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest2 text-silver-lo">
-            File — JPG or PNG, under 8MB
+            {selected.kind === 'video'
+              ? 'File — MP4 or MOV, under 40MB'
+              : selected.kind === 'image'
+                ? 'File — JPG, PNG or WebP, under 8MB'
+                : 'File — photo or video'}
           </label>
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={
+              selected.kind === 'video'
+                ? 'video/mp4,video/quicktime,video/webm'
+                : selected.kind === 'image'
+                  ? 'image/jpeg,image/png,image/webp'
+                  : 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm'
+            }
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="w-full border border-silver/15 bg-void-000 px-3 py-2.5 font-mono text-[12px] text-silver-hi outline-none file:mr-3 file:border-0 file:bg-flare file:px-3 file:py-1.5 file:font-mono file:text-[10px] file:uppercase file:tracking-widest2 file:text-void-000"
           />
@@ -453,7 +484,7 @@ function ImageUploader({ creds }) {
         )}
 
         <VoidButton size="sm" onClick={upload} disabled={busy} className="w-full">
-          <UploadCloud size={13} /> {busy ? 'Uploading…' : 'Upload photo'}
+          <UploadCloud size={13} /> {busy ? 'Uploading…' : 'Upload'}
         </VoidButton>
       </div>
     </section>

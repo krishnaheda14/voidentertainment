@@ -1,25 +1,32 @@
 import { useEffect, useState } from 'react'
-import { brand as defaultBrand, week as defaultWeek, weekLabel as defaultWeekLabel } from '../data/site'
+import {
+  brand as defaultBrand,
+  week as defaultWeek,
+  weekLabel as defaultWeekLabel,
+  pastNights as defaultPastNights,
+} from '../data/site'
 import { ADMIN_HASH } from './adminHash'
 
 /* --------------------------------------------------------------------------
    ADMIN GATE + LOCAL OVERRIDES + LIVE PUBLISH
 
-   The login only unlocks the editing panel in this browser. Credentials are
-   never stored in the code — only a SHA-256 hash of "id:password" (see
-   ./adminHash.js, shared with the API route that verifies it server-side).
+   The login only unlocks /admin in this browser. Credentials are never
+   stored in the code — only a SHA-256 hash of "id:password" (see
+   ./adminHash.js, shared with every server function that verifies it).
 
-   Saving in the panel does two things:
-   1. Writes to this browser's localStorage — an instant local preview that
-      overrides the defaults from src/data/site.js on load.
-   2. Calls /api/save-content, a Vercel serverless function that commits the
-      change to src/data/content.json on GitHub (see api/save-content.js).
-      GitHub's push then triggers Vercel's normal auto-deploy, so the change
-      goes live for every visitor in roughly a minute — no manual redeploy.
+   Three layers feed week/weekLabel/brand/pastNights, in priority order:
+   1. localStorage override — an instant local preview, this browser only.
+   2. Remote content — fetched once from /api/content. On Cloudflare Pages
+      this reads a KV store that /admin writes to directly, so a publish is
+      live for every visitor within seconds, no rebuild. On Vercel (or
+      local dev) that endpoint doesn't exist, the fetch just 404s, and this
+      layer is skipped.
+   3. The bundled default — ./content.json, baked in at build time. Always
+      available, which is what Vercel's GitHub-commit publish path updates
+      (see api/save-content.js) and what a fresh Cloudflare KV store falls
+      back to before anyone has published anything.
 
-   To change the credentials, run:
-     node -e "const c=require('crypto');console.log(c.createHash('sha256').update('NEW_ID:NEW_PASSWORD').digest('hex'))"
-   and replace the value in ./adminHash.js with the output.
+   See ADMIN-SETUP.md for the full publish methodology on either host.
    -------------------------------------------------------------------------- */
 
 const SESSION_KEY = 'void.admin.session'
@@ -86,20 +93,54 @@ export function notifyDataChanged() {
   window.dispatchEvent(new Event(CHANGE_EVENT))
 }
 
+/* --------------------------------------------------------------------------
+   REMOTE CONTENT — fetched once from /api/content (see functions/api/
+   content.js). Only present on Cloudflare Pages once a KV namespace is
+   bound; everywhere else the fetch 404s or network-errors and this stays
+   null, so readWeek/readBrand/readPastNights just fall through to the
+   bundled defaults below. Either way the page never blocks on this fetch —
+   it renders the bundled defaults immediately, then quietly updates if a
+   newer remote copy shows up a moment later.
+   -------------------------------------------------------------------------- */
+let remoteContent = null
+
+if (typeof window !== 'undefined' && typeof fetch === 'function') {
+  fetch('/api/content')
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => {
+      if (data && typeof data === 'object') {
+        remoteContent = data
+        notifyDataChanged()
+      }
+    })
+    .catch(() => {})
+}
+
 function readWeek() {
   const o = loadOverrides()
   if (o && Array.isArray(o.week)) {
     return { week: o.week, weekLabel: o.weekLabel || defaultWeekLabel }
+  }
+  if (remoteContent && Array.isArray(remoteContent.week)) {
+    return { week: remoteContent.week, weekLabel: remoteContent.weekLabel || defaultWeekLabel }
   }
   return { week: defaultWeek, weekLabel: defaultWeekLabel }
 }
 
 function readBrand() {
   const o = loadOverrides()
-  return { ...defaultBrand, ...(o && o.brand ? o.brand : {}) }
+  const remoteBrand = remoteContent && remoteContent.brand ? remoteContent.brand : {}
+  return { ...defaultBrand, ...remoteBrand, ...(o && o.brand ? o.brand : {}) }
 }
 
-/** Live week/weekLabel — reflects an admin's saved overrides in this browser. */
+function readPastNights() {
+  const o = loadOverrides()
+  if (o && Array.isArray(o.pastNights)) return o.pastNights
+  if (remoteContent && Array.isArray(remoteContent.pastNights)) return remoteContent.pastNights
+  return defaultPastNights
+}
+
+/** Live week/weekLabel — reflects a published change or an admin's local preview. */
 export function useOverridableWeek() {
   const [data, setData] = useState(readWeek)
   useEffect(() => {
@@ -115,6 +156,17 @@ export function useOverridableBrand() {
   const [data, setData] = useState(readBrand)
   useEffect(() => {
     const onChange = () => setData(readBrand())
+    window.addEventListener(CHANGE_EVENT, onChange)
+    return () => window.removeEventListener(CHANGE_EVENT, onChange)
+  }, [])
+  return data
+}
+
+/** Live "What it looks like" gallery — same override mechanism. */
+export function useOverridablePastNights() {
+  const [data, setData] = useState(readPastNights)
+  useEffect(() => {
+    const onChange = () => setData(readPastNights())
     window.addEventListener(CHANGE_EVENT, onChange)
     return () => window.removeEventListener(CHANGE_EVENT, onChange)
   }, [])
@@ -142,6 +194,21 @@ export function validateWeek(week) {
       if (typeof ev.title !== 'string' || typeof ev.venue !== 'string') {
         throw new Error(`every event in "${d.day}" needs "title" and "venue"`)
       }
+    }
+  }
+}
+
+/** Throws with a readable message if the pastNights JSON is not usable. */
+export function validatePastNights(pastNights) {
+  if (!Array.isArray(pastNights)) {
+    throw new Error('pastNights must be an array (can be empty)')
+  }
+  for (const item of pastNights) {
+    if (typeof item.title !== 'string' || !item.title) {
+      throw new Error('every past night needs a "title"')
+    }
+    if (typeof item.venue !== 'string' || !item.venue) {
+      throw new Error(`"${item.title}" needs a "venue"`)
     }
   }
 }
