@@ -1,7 +1,18 @@
 # Wrangler config for Cloudflare Pages (direct upload / CLI deploys).
 # Only needed if you deploy with `npm run deploy`. Git-connected deploys
 # configure everything in the Cloudflare dashboard instead.
+#
+# Once a project is deployed via `wrangler pages deploy`, Cloudflare treats
+# this file as the source of truth for bindings and locks the dashboard's
+# "Add binding" UI — that's the "Bindings for this project are being
+# managed through wrangler.toml" message. CONTENT_KV below is what the
+# admin panel's live-publish and view-count functions read from
+# (functions/api/*.js) — see ADMIN-SETUP.md.
 
 name = "void-entertainment"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "CONTENT_KV"
+id = "260df23a7ea8481b9150bc5046d2fbde"
