@@ -6,4 +6,4 @@
      node -e "const c=require('crypto');console.log(c.createHash('sha256').update('NEW_ID:NEW_PASSWORD').digest('hex'))"
    and replace the value below with the output. */
 export const ADMIN_HASH =
-  '409bf2bfee78c822ed5acfe9c4557334f0ce744daef0bf01c1d847fc06cfc1f1'
+  '1e0eb998d83219560a3139c675c28b369a04f258f9c8da808be2454874f9c6dc'
