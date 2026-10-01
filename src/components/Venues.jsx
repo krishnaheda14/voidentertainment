@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Navigation } from 'lucide-react'
 import { venues } from '../data/site'
-import { cx, useMediaQuery, waBooking } from '../lib/utils'
-import { Reveal, SectionHead, SmartImage, VoidButton } from './ui'
+import { cx, waBooking } from '../lib/utils'
+import { SectionHead, SmartImage, VoidButton } from './ui'
 
 function DataRow({ k, v }) {
   return (
@@ -15,23 +15,11 @@ function DataRow({ k, v }) {
   )
 }
 
-function VenueCard({ v, index, horizontal }) {
+function VenueCard({ v, index }) {
   return (
-    <article
-      className={cx(
-        'panel group relative flex flex-col overflow-hidden',
-        horizontal
-          ? 'h-[74vh] w-[min(80vw,980px)] shrink-0 lg:flex-row'
-          : 'w-full'
-      )}
-    >
+    <article className="panel group relative flex h-[82vh] max-h-[640px] w-[88vw] shrink-0 flex-col overflow-hidden sm:w-[70vw] lg:h-[74vh] lg:w-[min(80vw,980px)] lg:flex-row">
       {/* image side */}
-      <div
-        className={cx(
-          'relative overflow-hidden',
-          horizontal ? 'h-[38%] lg:h-full lg:w-[46%]' : 'h-56 sm:h-72'
-        )}
-      >
+      <div className="relative h-[38%] overflow-hidden lg:h-full lg:w-[46%]">
         <SmartImage
           src={v.image}
           alt={`${v.name}, ${v.area}`}
@@ -50,12 +38,7 @@ function VenueCard({ v, index, horizontal }) {
       </div>
 
       {/* content side */}
-      <div
-        className={cx(
-          'flex flex-1 flex-col justify-between gap-6 p-6 sm:p-8',
-          horizontal && 'lg:overflow-y-auto'
-        )}
-      >
+      <div className="flex flex-1 flex-col justify-between gap-6 overflow-y-auto p-6 sm:p-8">
         <div>
           <div className="mb-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest2 text-silver-lo">
             <span className="text-flare">{v.area}</span>
@@ -118,10 +101,10 @@ function VenueCard({ v, index, horizontal }) {
   )
 }
 
-/* Carousel on desktop, stacked cards on mobile — the full room-by-room walk.
-   Used inside the "See all venues" accordion so the main page stays short. */
+/* The full room-by-room walk — a swipeable, arrow-navigable carousel at
+   every screen size, so getting past this section on mobile is a tap or a
+   swipe, not scrolling through every venue's full card one at a time. */
 function VenueCarousel() {
-  const horizontal = useMediaQuery('(min-width: 1024px)')
   const n = venues.length
 
   const trackRef = useRef(null)
@@ -130,7 +113,6 @@ function VenueCarousel() {
   const [current, setCurrent] = useState(0)
 
   useEffect(() => {
-    if (!horizontal) return
     const el = trackRef.current
     if (!el) return
     const update = () => {
@@ -156,7 +138,7 @@ function VenueCarousel() {
       el.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [horizontal])
+  }, [])
 
   // Circular: past the last card, next wraps to the first (and back again from prev).
   const nudge = (dir) => {
@@ -171,11 +153,11 @@ function VenueCarousel() {
   const arrowClass =
     'grid h-12 w-12 place-items-center border border-silver/25 bg-void-000/80 text-silver backdrop-blur transition-all duration-300 hover:border-flare hover:bg-flare hover:text-void-000'
 
-  return horizontal ? (
+  return (
     <div className="relative">
       <div
         ref={trackRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pl-6 pr-6 xl:pl-12"
+        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pl-6 pr-6 sm:gap-6 xl:pl-12"
       >
         {venues.map((v, i) => (
           <div
@@ -183,33 +165,34 @@ function VenueCarousel() {
             ref={(el) => (cardRefs.current[i] = el)}
             className="snap-start scroll-ml-6 xl:scroll-ml-12"
           >
-            <VenueCard v={v} index={i} horizontal />
+            <VenueCard v={v} index={i} />
           </div>
         ))}
       </div>
 
-      {/* arrows — the carousel loops, so these never disable */}
+      {/* arrows — the carousel loops, so these never disable. Always on,
+          even on mobile: tap through instead of scrolling past every card. */}
       <button
         onClick={() => nudge(-1)}
         aria-label="Previous venue"
-        className={cx(arrowClass, 'absolute left-4 top-1/2 z-10 -translate-y-1/2 xl:left-8')}
+        className={cx(arrowClass, 'absolute left-2 top-1/2 z-10 -translate-y-1/2 sm:left-4 xl:left-8')}
       >
         <ChevronLeft size={18} />
       </button>
       <button
         onClick={() => nudge(1)}
         aria-label="Next venue"
-        className={cx(arrowClass, 'absolute right-4 top-1/2 z-10 -translate-y-1/2 xl:right-8')}
+        className={cx(arrowClass, 'absolute right-2 top-1/2 z-10 -translate-y-1/2 sm:right-4 xl:right-8')}
       >
         <ChevronRight size={18} />
       </button>
 
       {/* floor progress */}
-      <div className="mx-auto mt-8 w-[min(46vw,420px)]">
+      <div className="mx-auto mt-8 w-[min(70vw,420px)]">
         <div className="mb-2 flex justify-between font-mono text-[9px] uppercase tracking-widest2 text-silver-lo">
-          <span>Bandra</span>
+          <span className="hidden sm:inline">Bandra</span>
           <span>Walk the floor</span>
-          <span>Juhu</span>
+          <span className="hidden sm:inline">Juhu</span>
         </div>
         <div className="h-px w-full bg-silver/15">
           <div
@@ -218,14 +201,6 @@ function VenueCarousel() {
           />
         </div>
       </div>
-    </div>
-  ) : (
-    <div className="shell grid gap-6">
-      {venues.map((v, i) => (
-        <Reveal key={v.slug} delay={i * 0.04}>
-          <VenueCard v={v} index={i} horizontal={false} />
-        </Reveal>
-      ))}
     </div>
   )
 }

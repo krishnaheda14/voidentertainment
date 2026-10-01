@@ -154,6 +154,32 @@ export const venues = [
     tags: ['Underground bookings', 'Real sound system', 'Bandra crowd'],
     image: '/media/venues/all-saints.jpg',
   },
+  {
+    // Verified: Savoy Chambers address, PIN, hours, founders and concept
+    // via India Food Network's launch coverage and Zomato's listing.
+    // Coordinates decoded from Mappls' listing for the same building
+    // (Takumi, also in Savoy Chambers). `door`, `floor` and `best` are
+    // reasonable defaults, not independently confirmed — edit freely from
+    // /admin if you have the exact details.
+    slug: 'linking-house',
+    name: 'LINKING HOUSE',
+    area: 'Santacruz West',
+    pin: '400054',
+    coords: [19.0855, 72.8349],
+    door: '19:00',
+    close: '01:30',
+    floor: 'Ground floor',
+    capacity: '250',
+    sound: 'All-day lounge · Karaoke nights · Sufi sessions',
+    dress: 'Smart casual. Relaxed by day, sharper after dark.',
+    address: 'Savoy Chambers, Linking Road Extension, Hasmukh Nagar, Santacruz West, Mumbai 400054',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Linking+House+Santacruz+West+Mumbai',
+    blurb:
+      'An all-day social culinary house on Linking Road — opens with coffee, closes with cocktails. Fire-led dinners and migratory-bird cocktails up front; a back room with a pool table and board games that turns into karaoke and Sufi nights once the kitchen slows down.',
+    best: 'Thursday',
+    tags: ['All-day café to bar', 'Fire-led kitchen', 'Karaoke & Sufi nights'],
+    image: '/media/venues/linking-house.jpg',
+  },
 ]
 
 /* --------------------------------------------------------------------------
