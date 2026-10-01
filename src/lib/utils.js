@@ -12,6 +12,37 @@ export function waLink(message = '') {
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 }
 
+/* --------------------------------------------------------------------------
+   YOUTUBE
+   The admin panel's "YouTube video ID" field accepts a bare ID or any
+   common full URL (youtu.be, watch?v=, /embed/, /shorts/, with or without
+   extra tracking params) — this pulls the 11-character ID out of whatever
+   got pasted in, so the embed always gets a clean ID either way.
+   -------------------------------------------------------------------------- */
+export function parseYouTubeId(input) {
+  const trimmed = (input || '').trim()
+  if (!trimmed) return ''
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed
+
+  try {
+    const url = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`)
+    const host = url.hostname.replace(/^(m|www)\./, '')
+    if (host === 'youtu.be') {
+      return url.pathname.split('/').filter(Boolean)[0] || ''
+    }
+    if (host === 'youtube.com') {
+      if (url.searchParams.get('v')) return url.searchParams.get('v')
+      const match = url.pathname.match(/\/(embed|shorts)\/([\w-]{11})/)
+      if (match) return match[2]
+    }
+  } catch {
+    // Not a parseable URL — fall through to a best-effort scan below.
+  }
+
+  const match = trimmed.match(/[\w-]{11}/)
+  return match ? match[0] : trimmed
+}
+
 export function waBooking({ venue, night, title } = {}) {
   const lines = ['Hi Team Void — I want to book through you.']
   if (venue) lines.push(`Venue: ${venue}`)

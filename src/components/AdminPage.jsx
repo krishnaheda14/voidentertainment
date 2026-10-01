@@ -428,8 +428,13 @@ function NightFields({ n, onChange, onRemove }) {
         <Field label="Poster photo path">
           <input value={n.poster} onChange={set('poster')} placeholder="/media/gallery/name.jpg" className={fieldClass} />
         </Field>
-        <Field label="YouTube video ID">
-          <input value={n.youtube} onChange={set('youtube')} placeholder="dQw4w9WgXcQ" className={fieldClass} />
+        <Field label="YouTube link — paste the full URL or just the ID">
+          <input
+            value={n.youtube}
+            onChange={set('youtube')}
+            placeholder="https://youtu.be/dQw4w9WgXcQ — unlisted is fine"
+            className={fieldClass}
+          />
         </Field>
         <Field label="Self-hosted video path (short clips only)">
           <input value={n.video} onChange={set('video')} placeholder="/media/videos/name.mp4" className={fieldClass} />
@@ -721,7 +726,7 @@ function ImageUploader({ creds, onAddGalleryItem }) {
         {target === 'gallery-video' && (
           <p className="border border-flare/30 bg-void-000 p-3 font-mono text-[10px] leading-relaxed text-silver-mid">
             For anything longer than a few seconds, upload it to YouTube (unlisted is fine) instead — add a
-            night in the gallery editor on the left and paste the video's ID into its{' '}
+            night in the gallery editor on the left and paste the video's link into its{' '}
             <code className="text-silver-hi">youtube</code> field. No upload needed, and it plays far more
             reliably than a self-hosted file.
           </p>

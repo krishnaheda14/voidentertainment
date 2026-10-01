@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Play, X, Instagram } from 'lucide-react'
 import { brand } from '../data/site'
-import { cx } from '../lib/utils'
+import { cx, parseYouTubeId } from '../lib/utils'
 import { useOverridablePastNights } from '../lib/admin'
 import { Reveal, SectionHead, SmartImage, VoidButton } from './ui'
 
@@ -52,7 +52,7 @@ function Lightbox({ item, onClose }) {
           {item.youtube ? (
             <iframe
               className="h-full w-full"
-              src={`https://www.youtube-nocookie.com/embed/${item.youtube}?autoplay=1&rel=0&modestbranding=1`}
+              src={`https://www.youtube-nocookie.com/embed/${parseYouTubeId(item.youtube)}?autoplay=1&rel=0&modestbranding=1`}
               title={`${item.title} — ${item.venue}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
