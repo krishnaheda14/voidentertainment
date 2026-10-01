@@ -15,6 +15,16 @@
   },
   "week": [
     {
+      "day": "Mon",
+      "long": "Monday",
+      "events": []
+    },
+    {
+      "day": "Tue",
+      "long": "Tuesday",
+      "events": []
+    },
+    {
       "day": "Wed",
       "long": "Wednesday",
       "events": [
