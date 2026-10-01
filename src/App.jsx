@@ -8,7 +8,6 @@ import Venues from './components/Venues'
 import PastNights from './components/PastNights'
 import { Ticker, Ledger, Process } from './components/Strip'
 import { Book, Footer } from './components/Book'
-import AdminPanel from './components/AdminPanel'
 import { Accordion } from './components/ui'
 import { useSmoothScroll } from './lib/utils'
 
@@ -77,7 +76,6 @@ export default function App() {
 
       <Footer />
       <WhatsAppFab />
-      <AdminPanel />
     </div>
   )
 }

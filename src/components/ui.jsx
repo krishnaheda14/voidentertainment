@@ -220,7 +220,7 @@ export function Tilt({ children, className = '', max = 6 }) {
 export function Accordion({ label, meta, children, className = '', defaultOpen = false }) {
   return (
     <details
-      className={cx('group border border-silver/10', className)}
+      className={cx('group border border-silver/10 transition-colors hover:border-silver/25', className)}
       open={defaultOpen}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6">
@@ -234,10 +234,15 @@ export function Accordion({ label, meta, children, className = '', defaultOpen =
             </span>
           )}
         </span>
-        <ChevronDown
-          size={18}
-          className="shrink-0 text-silver-lo transition-transform duration-300 group-open:rotate-180 group-open:text-flare"
-        />
+        <span className="flex shrink-0 items-center gap-2.5">
+          <span className="hidden font-mono text-[9px] uppercase tracking-widest2 text-silver-lo group-open:text-flare sm:inline">
+            <span className="group-open:hidden">Tap to open</span>
+            <span className="hidden group-open:inline">Tap to close</span>
+          </span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-silver/20 text-silver-lo transition-all duration-300 group-hover:border-flare group-hover:text-flare group-open:rotate-180 group-open:border-flare group-open:text-flare">
+            <ChevronDown size={16} />
+          </span>
+        </span>
       </summary>
       <div className="border-t border-silver/10 px-6 py-8 sm:px-8">{children}</div>
     </details>

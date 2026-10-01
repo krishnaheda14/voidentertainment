@@ -141,26 +141,33 @@ YouTube is strongly preferred. It handles the bandwidth, the transcoding and the
 void-entertainment/
 ├── index.html                 Meta tags, fonts, structured data, anti-flash boot screen
 ├── src/
-│   ├── data/site.js           ← ALL your content lives here
+│   ├── data/site.js           Venues, past nights, stats — content.json holds the weekly-editable bits
+│   ├── data/content.json      Schedule, week label, brand — what the admin panel edits and publishes
 │   ├── lib/utils.js           WhatsApp links, IST clock, smooth scroll
+│   ├── lib/admin.js           Admin login, local preview overrides
 │   ├── index.css              Design tokens + the brushed-metal type treatment
-│   ├── App.jsx                Page composition
+│   ├── App.jsx / main.jsx     Page composition + the /admin route split
 │   └── components/
 │       ├── Chrome.jsx         Preloader, cursor, nav, floating WhatsApp button
 │       ├── Hero.jsx           Hero + the live Tonight rail
 │       ├── Schedule.jsx       Seven-night board
-│       ├── Venues.jsx         Horizontal venue walk (desktop) / stack (mobile)
+│       ├── Venues.jsx         Looping venue carousel
 │       ├── Strip.jsx          Ticker, numbers, three-step process
 │       ├── PastNights.jsx     Video + photo wall with lightbox
-│       ├── Book.jsx           FAQ, booking composer, footer
-│       └── ui.jsx             Shared bits (buttons, reveals, image fallback)
+│       ├── Book.jsx           Booking CTAs, composer, footer
+│       ├── AdminPage.jsx      /admin — login, content editor, photo uploader
+│       └── ui.jsx             Shared bits (buttons, reveals, accordion, image fallback)
+├── api/                       Vercel serverless functions (admin publish/upload)
+├── functions/api/             Same, as Cloudflare Pages Functions — see ADMIN-SETUP.md
 ├── public/
 │   ├── _headers               Cloudflare cache + security headers
 │   ├── _redirects             SPA routing so deep links never 404
 │   ├── robots.txt, sitemap.xml, favicon.svg
 │   └── media/                 Your photos and videos
 ├── wrangler.toml              Only needed for CLI deploys
-└── DEPLOY-CLOUDFLARE.md       Hosting, start to finish
+├── DEPLOY-CLOUDFLARE.md       Hosting, start to finish
+├── DEPLOY-VERCEL.md           Hosting on Vercel instead
+└── ADMIN-SETUP.md             The /admin route: credentials, GitHub token, Cloudflare KV/R2
 ```
 
 ---

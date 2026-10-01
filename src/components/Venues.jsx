@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Navigation } from 'lucide-react'
 import { venues } from '../data/site'
 import { cx, useMediaQuery, waBooking } from '../lib/utils'
-import { Accordion, Reveal, SectionHead, SmartImage, VoidButton } from './ui'
+import { Reveal, SectionHead, SmartImage, VoidButton } from './ui'
 
 function DataRow({ k, v }) {
   return (
@@ -172,16 +172,16 @@ function VenueCarousel() {
     'grid h-12 w-12 place-items-center border border-silver/25 bg-void-000/80 text-silver backdrop-blur transition-all duration-300 hover:border-flare hover:bg-flare hover:text-void-000'
 
   return horizontal ? (
-    <div className="relative -mx-6 sm:-mx-8">
+    <div className="relative">
       <div
         ref={trackRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 sm:px-8"
+        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pl-6 pr-6 xl:pl-12"
       >
         {venues.map((v, i) => (
           <div
             key={v.slug}
             ref={(el) => (cardRefs.current[i] = el)}
-            className="snap-start scroll-ml-6 sm:scroll-ml-8"
+            className="snap-start scroll-ml-6 xl:scroll-ml-12"
           >
             <VenueCard v={v} index={i} horizontal />
           </div>
@@ -192,14 +192,14 @@ function VenueCarousel() {
       <button
         onClick={() => nudge(-1)}
         aria-label="Previous venue"
-        className={cx(arrowClass, 'absolute left-4 top-1/2 z-10 -translate-y-1/2')}
+        className={cx(arrowClass, 'absolute left-4 top-1/2 z-10 -translate-y-1/2 xl:left-8')}
       >
         <ChevronLeft size={18} />
       </button>
       <button
         onClick={() => nudge(1)}
         aria-label="Next venue"
-        className={cx(arrowClass, 'absolute right-4 top-1/2 z-10 -translate-y-1/2')}
+        className={cx(arrowClass, 'absolute right-4 top-1/2 z-10 -translate-y-1/2 xl:right-8')}
       >
         <ChevronRight size={18} />
       </button>
@@ -220,7 +220,7 @@ function VenueCarousel() {
       </div>
     </div>
   ) : (
-    <div className="grid gap-6">
+    <div className="shell grid gap-6">
       {venues.map((v, i) => (
         <Reveal key={v.slug} delay={i * 0.04}>
           <VenueCard v={v} index={i} horizontal={false} />
@@ -231,70 +231,22 @@ function VenueCarousel() {
 }
 
 /* ==========================================================================
-   TOP VENUES — the compact version shown on the main page: a couple of
-   featured rooms, plus an accordion that opens into the full room-by-room
-   carousel above. Keeps the page short without hiding anything.
+   VENUES — all six rooms, straight up, in the looping carousel. No
+   featured-two / expand-to-see-more split: with only six rooms the split
+   just duplicated the same cards, so this shows everything directly.
    ========================================================================== */
-function TopVenueCard({ v, delay }) {
-  return (
-    <Reveal delay={delay}>
-      <article className="panel group relative flex h-full flex-col overflow-hidden">
-        <div className="relative h-48 overflow-hidden sm:h-56">
-          <SmartImage
-            src={v.image}
-            alt={`${v.name}, ${v.area}`}
-            caption={v.name}
-            className="h-full w-full"
-            imgClass="transition-transform duration-[1.4s] ease-out group-hover:scale-[1.07]"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-void-000 via-void-000/25 to-transparent" />
-        </div>
-        <div className="flex flex-1 flex-col justify-between gap-5 p-6">
-          <div>
-            <div className="mb-2 flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest2 text-silver-lo">
-              <span className="text-flare">{v.area}</span>
-              <span className="h-px w-5 bg-silver/25" />
-              <span>Best on {v.best}</span>
-            </div>
-            <h3 className="metal text-[clamp(1.6rem,3.4vw,2.2rem)] leading-[0.9]">{v.name}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-silver-mid">{v.blurb}</p>
-          </div>
-          <VoidButton href={waBooking({ venue: v.name })} size="sm" className="self-start">
-            <MessageCircle size={13} strokeWidth={2.5} />
-            Get me in
-          </VoidButton>
-        </div>
-      </article>
-    </Reveal>
-  )
-}
-
 export default function Venues() {
-  const featured = venues.slice(0, 2)
-
   return (
     <section id="venues" className="relative scroll-mt-20 py-20 sm:py-28">
       <div className="shell">
         <SectionHead
           eyebrow={`Top venues · ${venues.length} in Mumbai`}
           title="Where we work"
-          meta="Two of the rooms filling up fastest right now. Do not see the one you want? Message the desk, we probably already have a door there."
+          meta="Every room we hold a door at, in one looping walk. Do not see the one you want? Message the desk, we probably already have a door there."
         />
-
-        <div className="grid gap-6 sm:grid-cols-2">
-          {featured.map((v, i) => (
-            <TopVenueCard key={v.slug} v={v} delay={i * 0.06} />
-          ))}
-        </div>
-
-        <Accordion
-          label={`See all ${venues.length} venues`}
-          meta="Full room-by-room walk — sound, dress code, doors, capacity"
-          className="mt-8"
-        >
-          <VenueCarousel />
-        </Accordion>
       </div>
+
+      <VenueCarousel />
     </section>
   )
 }

@@ -85,26 +85,17 @@ This site is single-page (everything scrolls on one URL), so it's mostly future-
 
 ## Part 3.5 — Turn on the admin panel's "Publish live" button
 
-The lock icon in the nav opens an admin panel (login form + a JSON editor for the weekly schedule and brand info). Saving there always previews instantly in that one browser. To make **Publish live** actually push the change to the real site for every visitor, it needs a small serverless function (`api/save-content.js`, already in this repo) that commits `src/data/content.json` to GitHub on your behalf — that commit is what triggers the normal Vercel rebuild.
+The site has a dedicated admin login at **`/admin`** (also linked from the lock icon in the nav) — login form, a JSON editor for the weekly schedule and brand info, and a photo uploader. Saving there always previews instantly in that one browser. To make **Publish live** actually push the change to the real site for every visitor, it needs a small serverless function (`api/save-content.js`, already in this repo) that commits `src/data/content.json` to GitHub on your behalf — that commit is what triggers the normal Vercel rebuild.
 
-1. **Create a GitHub token.** GitHub → Settings → Developer settings → **Fine-grained personal access tokens** → Generate new token.
-   - Repository access: **Only select repositories** → `voidentertainment`.
-   - Permissions → **Contents: Read and write**. Nothing else needed.
-   - Copy the token now — GitHub only shows it once.
-2. **Add env vars in Vercel.** Project → Settings → Environment Variables:
+Full step-by-step, including the GitHub token and the Cloudflare env var equivalent, now lives in **[ADMIN-SETUP.md](ADMIN-SETUP.md)** — short version:
 
-   | Name | Value |
-   |---|---|
-   | `GITHUB_TOKEN` | the token from step 1 |
-   | `GITHUB_REPO` | `krishnaheda14/voidentertainment` |
-   | `GITHUB_BRANCH` | `main` (optional — this is already the default) |
-
-   Add them to **Production** (and Preview, if you want it to work on preview deploys too).
-3. **Redeploy** once (Deployments → ⋯ → Redeploy) so the function picks up the new env vars.
+1. Create a GitHub fine-grained token scoped to this repo with **Contents: Read and write**.
+2. Project → Settings → Environment Variables → add `GITHUB_TOKEN` and `GITHUB_REPO` (`krishnaheda14/voidentertainment`).
+3. Redeploy once so the functions pick up the new env vars.
 
 Without this, **Publish live** returns "Server is not configured to publish yet" — the local preview still works fine, it just won't reach GitHub.
 
-The credentials for the admin panel itself (the ID/password behind the lock icon) are set separately, as a hash in `src/lib/adminHash.js` — see the comment at the top of that file to change them.
+The credentials for `/admin` itself (the ID/password) are set separately, as a hash in `src/lib/adminHash.js` — see **[ADMIN-SETUP.md](ADMIN-SETUP.md)** Part 1 to change them.
 
 ---
 

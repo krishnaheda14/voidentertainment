@@ -324,14 +324,14 @@ export function Nav() {
               WhatsApp
             </VoidButton>
 
-            <button
-              onClick={() => window.dispatchEvent(new Event('void:admin-open'))}
+            <a
+              href="/admin"
               className="hidden h-10 w-10 place-items-center border border-silver/15 text-silver-lo transition-colors hover:border-flare hover:text-flare sm:grid"
               aria-label="Admin login"
               title="Admin"
             >
               <Lock size={14} />
-            </button>
+            </a>
 
             <button
               onClick={() => setOpen(true)}
@@ -401,15 +401,12 @@ export function Nav() {
               >
                 <Instagram size={13} /> {brand.instagramHandle}
               </a>
-              <button
-                onClick={() => {
-                  setOpen(false)
-                  window.dispatchEvent(new Event('void:admin-open'))
-                }}
+              <a
+                href="/admin"
                 className="mt-4 flex w-full items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-widest2 text-silver-lo"
               >
                 <Lock size={12} /> Admin
-              </button>
+              </a>
             </div>
           </motion.div>
         )}
