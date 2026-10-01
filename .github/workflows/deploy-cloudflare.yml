@@ -1,0 +1,37 @@
+name: Deploy to Cloudflare Pages
+
+# This project is a Cloudflare Pages "direct upload" project (created via
+# `wrangler pages deploy`), not Cloudflare's native Git integration — so a
+# push here does nothing on Cloudflare's side by itself. This workflow is
+# what plugs that gap: it builds and runs the same `wrangler pages deploy`
+# command you'd otherwise run by hand after every push, including the
+# commits the admin panel's photo/video uploader makes (api/upload-image.js
+# / functions/api/upload-image.js) — so those actually go live without
+# anyone needing to run `npm run deploy` manually. See ADMIN-SETUP.md Part 5.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=void-entertainment

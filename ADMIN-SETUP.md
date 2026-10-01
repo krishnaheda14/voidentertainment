@@ -134,23 +134,32 @@ Vercel — that part only runs on Cloudflare.
 1. Go to **yoursite.com/admin**.
 2. Log in with the ID and password (see "Changing your login" below if you
    don't have one set yet).
-3. On the left: a box of text (JSON) with your schedule, brand info, and
-   gallery. Edit the parts you need, then:
-   - **Publish live** — pushes the change to the real site.
-   - **Preview only** — just shows it to you in this browser first, so you
-     can check it looks right before publishing.
+3. On the left: the schedule, brand info and gallery, as real forms — not
+   JSON to hand-edit.
+   - **Schedule** — all seven days are always shown. Each day is a card;
+     click **"+ Add a room to [day]"** to add another venue running that
+     night, or the **×** on a room to remove it. A day can hold as many
+     rooms as are actually on.
+   - **Brand** — WhatsApp number, email, Instagram, hours, etc.
+   - **Gallery ("What it looks like")** — click **"+ Add a night to the
+     gallery"** for a new blank card (title, venue, caption, a photo or
+     video), or **×** to remove one.
+   - **Publish live** — pushes everything to the real site.
+   - **Preview only** — shows it to you in this browser first, so you can
+     check it looks right before publishing.
 4. On the right: upload a photo or video.
-   - Pick what it's for (which venue, or a gallery photo/video).
-   - Choose the file from your computer.
-   - Click **Upload**.
+   - Pick what it's for (a specific venue, or a gallery photo/video).
+   - Choose the file from your computer → **Upload**.
    - For a venue photo, you're done — it appears automatically.
-   - For a gallery photo/video, copy the path it shows you, then paste it
-     into that item's `poster` or `video` field in the box on the left, and
+   - For a gallery photo or video, click **"Add to gallery below"** after
+     it uploads — that drops a new, pre-filled card straight into the
+     gallery list on the left. Just give it a title and venue, then
      publish.
    - **For a video longer than a few seconds**, upload it to YouTube
      instead (as "Unlisted" if you don't want it public) and paste the
-     video's ID into the `youtube` field — this works far better than
-     uploading the raw video file.
+     **link** into that gallery card's YouTube field — either the full
+     URL or just the ID works. This plays far more reliably than a
+     self-hosted file.
 
 ### Changing your login
 
@@ -165,6 +174,54 @@ Vercel — that part only runs on Cloudflare.
 
 ---
 
+## Part 5 — Make photo/video uploads go live automatically (Cloudflare only)
+
+If you deployed to Cloudflare with `npm run deploy` (the command-line way,
+not Cloudflare's own "Connect to Git" dashboard flow), there's one gap
+worth knowing about: Cloudflare has no idea your GitHub repo exists, so
+when `/admin`'s photo/video uploader commits a new file to GitHub, nothing
+happens on the live site until **you** run `npm run deploy` again by hand.
+
+Schedule/brand/gallery text changes don't have this problem — those publish
+straight into the KV store from Part 2 and show up instantly regardless.
+This only affects actual photo/video files.
+
+**The fix:** a GitHub Action, already added to this repo at
+`.github/workflows/deploy-cloudflare.yml`, that runs the deploy command for
+you automatically on every push. It needs two values from you, added once
+as GitHub repo secrets:
+
+1. **Create a Cloudflare API token.**
+   - dash.cloudflare.com → click your profile icon (top right) → **My
+     Profile** → **API Tokens** → **Create Token**.
+   - Find the **"Edit Cloudflare Workers"** template → **Use template**
+     (Pages deploys go through the same permission as Workers).
+   - Leave the account/zone scoping as-is (or narrow it to just your
+     account) → **Continue to summary** → **Create Token**.
+   - Copy it — shown once, same as the GitHub token.
+
+2. **Find your Cloudflare Account ID.**
+   - dash.cloudflare.com → **Workers & Pages** → it's listed in the right
+     sidebar on that page as **Account ID**. Copy it.
+
+3. **Add both as GitHub repo secrets.**
+   - github.com → your repo → **Settings** → **Secrets and variables** →
+     **Actions** → **New repository secret**.
+   - Add `CLOUDFLARE_API_TOKEN` (the token from step 1).
+   - Add `CLOUDFLARE_ACCOUNT_ID` (the ID from step 2).
+
+That's it — no redeploy needed to turn this on, it takes effect on the next
+push. From then on, every push to `main` (including the automatic commits
+from photo/video uploads) builds and deploys to Cloudflare on its own.
+
+The Cloudflare dashboard's "disconnected from your Git account" warning
+will still show — that message is specifically about Cloudflare's own
+native Git integration, which this isn't using. It's safe to ignore once
+this Action is set up; the Action achieves the same practical result
+(auto-deploy on push) without needing to recreate the project.
+
+---
+
 ## Troubleshooting
 
 | What you see | What it means |
@@ -174,6 +231,8 @@ Vercel — that part only runs on Cloudflare.
 | Photo upload fails with "too large" | Keep photos under 8MB and videos under 20MB. For longer videos, use YouTube instead (see Part 4). |
 | View counter doesn't show up | That only works on Cloudflare with Part 2 done — it stays hidden everywhere else, which is normal. |
 | Wrong ID or password | Check `src/lib/adminHash.js` — see "Changing your login" above. |
+| Photo uploaded but not live on Cloudflare | Part 5 isn't set up yet, or the GitHub Action failed — check the **Actions** tab on your GitHub repo for a red ✕. Until then, run `npm run deploy` by hand. |
+| Cloudflare says "disconnected from your Git account" | Expected for a direct-upload project — see Part 5. Safe to ignore once the Action there is set up. |
 
 ---
 
@@ -188,5 +247,7 @@ Cloudflare KV storage ...... dash.cloudflare.com → Storage & Databases → KV
 Connect KV to your site .... Workers & Pages → your project → Settings →
                               Functions → KV namespace bindings
 Env vars (either host) ..... GITHUB_TOKEN, GITHUB_REPO
+Auto-deploy on Cloudflare .. GitHub repo secrets CLOUDFLARE_API_TOKEN,
+                              CLOUDFLARE_ACCOUNT_ID — see Part 5
 Change login ............... src/lib/adminHash.js
 ```
