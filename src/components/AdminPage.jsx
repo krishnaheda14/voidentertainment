@@ -20,6 +20,7 @@ import {
   validatePastNights,
 } from '../lib/admin'
 import { VoidButton } from './ui'
+import { cx } from '../lib/utils'
 import logo from '../data/logo-mark.png'
 
 const DAY_CODES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -395,8 +396,40 @@ function BrandEditor({ data, setData }) {
    GALLERY — "What it looks like" on the site. Add as many nights as you
    want; each one is a free-standing card, not tied to any fixed list.
    ========================================================================== */
-function NightFields({ n, onChange, onRemove }) {
+function slugify(s) {
+  return (s || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
+function NightFields({ n, onChange, onRemove, creds }) {
   const set = (k) => (e) => onChange({ [k]: e.target.value })
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+
+  const handlePosterUpload = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // lets the same file be re-picked later if needed
+    if (!file) return
+    setUploadError('')
+    setUploading(true)
+    try {
+      const ext = file.name.match(/\.(jpe?g|png|webp)$/i)?.[0]?.toLowerCase() || '.jpg'
+      const path = `media/gallery/${slugify(n.title) || `night-${Date.now()}`}${ext}`
+      const contentBase64 = await fileToBase64(file)
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...creds, path, contentBase64 }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`)
+      onChange({ poster: data.path })
+    } catch (err) {
+      setUploadError(err.message || 'Failed to upload.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div className="relative border border-silver/10 bg-void-000 p-3">
       <button
@@ -425,8 +458,31 @@ function NightFields({ n, onChange, onRemove }) {
             ))}
           </select>
         </Field>
-        <Field label="Poster photo path">
-          <input value={n.poster} onChange={set('poster')} placeholder="/media/gallery/name.jpg" className={fieldClass} />
+        <Field label="Poster photo">
+          <div className="flex gap-1.5">
+            <input
+              value={n.poster}
+              onChange={set('poster')}
+              placeholder="/media/gallery/name.jpg"
+              className={cx(fieldClass, 'flex-1')}
+            />
+            <label
+              className={cx(
+                'flex shrink-0 cursor-pointer items-center gap-1 border border-silver/15 bg-flare px-2.5 py-2 font-mono text-[10px] uppercase tracking-widest2 text-void-000 transition-colors hover:bg-flare-hot',
+                uploading && 'pointer-events-none opacity-60'
+              )}
+            >
+              <UploadCloud size={12} /> {uploading ? '…' : 'Upload'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePosterUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+          </div>
+          {uploadError && <p className="mt-1 text-[10px] text-flare">{uploadError}</p>}
         </Field>
         <Field label="YouTube link — paste the full URL or just the ID">
           <input
@@ -444,7 +500,7 @@ function NightFields({ n, onChange, onRemove }) {
   )
 }
 
-function GalleryEditor({ data, setData }) {
+function GalleryEditor({ data, setData, creds }) {
   const addNight = () => setData((d) => ({ ...d, pastNights: [...d.pastNights, emptyNight()] }))
   const removeNight = (i) => setData((d) => ({ ...d, pastNights: d.pastNights.filter((_, idx) => idx !== i) }))
   const updateNight = (i, patch) =>
@@ -453,7 +509,13 @@ function GalleryEditor({ data, setData }) {
   return (
     <div className="space-y-3">
       {data.pastNights.map((n, i) => (
-        <NightFields key={i} n={n} onChange={(patch) => updateNight(i, patch)} onRemove={() => removeNight(i)} />
+        <NightFields
+          key={i}
+          n={n}
+          creds={creds}
+          onChange={(patch) => updateNight(i, patch)}
+          onRemove={() => removeNight(i)}
+        />
       ))}
       {data.pastNights.length === 0 && (
         <p className="font-mono text-[10px] text-silver-lo">No nights in the gallery yet.</p>
@@ -567,7 +629,7 @@ function ContentEditor({ data, setData, creds }) {
 
       <div className="mb-6">
         <h3 className="eyebrow mb-3">What it looks like (gallery)</h3>
-        <GalleryEditor data={data} setData={setData} />
+        <GalleryEditor data={data} setData={setData} creds={creds} />
       </div>
 
       {error && <p className="mb-2 text-xs text-flare">{error}</p>}
