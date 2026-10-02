@@ -9,9 +9,6 @@ import {
 } from '../data/site'
 import {
   checkLogin,
-  isAdmin,
-  setAdmin,
-  logout,
   loadOverrides,
   saveOverrides,
   clearOverrides,
@@ -99,9 +96,12 @@ function currentOverridesData() {
    actually reaches the live site.
    ========================================================================== */
 export default function AdminPage() {
-  const [loggedIn, setLoggedIn] = useState(isAdmin)
-  // Kept in memory only (never persisted) so the API routes can re-verify
-  // each publish/upload server-side. Cleared on logout or tab close.
+  // Both reset on every page load by design — credentials are kept in
+  // memory only (never in sessionStorage/localStorage) so the API routes
+  // can re-verify each publish/upload server-side. That means a reload
+  // always requires logging in again; there is no "stay logged in" state
+  // that could end up without the credentials to back it up.
+  const [loggedIn, setLoggedIn] = useState(false)
   const [creds, setCreds] = useState(null)
 
   // index.html paints a static "VOID" boot screen to avoid a white flash;
@@ -170,7 +170,6 @@ function LoginForm({ onSuccess }) {
     const ok = await checkLogin(trimmedId, password)
     setBusy(false)
     if (ok) {
-      setAdmin()
       onSuccess({ id: trimmedId, password })
     } else {
       setError('Wrong ID or password.')
@@ -223,10 +222,7 @@ function EditPage({ creds, onLogout }) {
       <ContentEditor data={data} setData={setData} creds={creds} />
       <ImageUploader creds={creds} onAddGalleryItem={addGalleryItem} />
       <button
-        onClick={() => {
-          logout()
-          onLogout()
-        }}
+        onClick={onLogout}
         className="font-mono text-[10px] uppercase tracking-widest2 text-silver-lo transition-colors hover:text-flare lg:col-span-2"
       >
         Log out

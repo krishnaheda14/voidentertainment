@@ -29,7 +29,6 @@ import { ADMIN_HASH } from './adminHash'
    See ADMIN-SETUP.md for the full publish methodology on either host.
    -------------------------------------------------------------------------- */
 
-const SESSION_KEY = 'void.admin.session'
 export const OVERRIDES_KEY = 'void.admin.overrides'
 
 export async function checkLogin(id, password) {
@@ -43,26 +42,6 @@ export async function checkLogin(id, password) {
   } catch {
     return false
   }
-}
-
-export function isAdmin() {
-  try {
-    return sessionStorage.getItem(SESSION_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-export function setAdmin() {
-  try {
-    sessionStorage.setItem(SESSION_KEY, '1')
-  } catch {}
-}
-
-export function logout() {
-  try {
-    sessionStorage.removeItem(SESSION_KEY)
-  } catch {}
 }
 
 export function loadOverrides() {
