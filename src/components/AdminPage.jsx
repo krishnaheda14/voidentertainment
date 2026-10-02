@@ -17,8 +17,11 @@ import {
   validatePastNights,
 } from '../lib/admin'
 import { VoidButton } from './ui'
+import ImageCropDialog from './ImageCropDialog'
 import { cx } from '../lib/utils'
 import logo from '../data/logo-mark.png'
+
+const SPAN_ASPECT = { wide: 16 / 9, tall: 3 / 4, normal: 4 / 3 }
 
 /* If this ever fires, `creds` went missing despite the UI showing the
    editor — it means this tab is running an older build than the one on
@@ -415,12 +418,18 @@ function NightFields({ n, onChange, onRemove, creds }) {
   const set = (k) => (e) => onChange({ [k]: e.target.value })
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [pendingFile, setPendingFile] = useState(null)
 
-  const handlePosterUpload = async (e) => {
+  const pickFile = (e) => {
     const file = e.target.files?.[0]
     e.target.value = '' // lets the same file be re-picked later if needed
     if (!file) return
     setUploadError('')
+    setPendingFile(file)
+  }
+
+  const uploadCropped = async (blob) => {
+    setPendingFile(null)
     const credsProblem = credsError(creds)
     if (credsProblem) {
       setUploadError(credsProblem)
@@ -428,9 +437,8 @@ function NightFields({ n, onChange, onRemove, creds }) {
     }
     setUploading(true)
     try {
-      const ext = file.name.match(/\.(jpe?g|png|webp)$/i)?.[0]?.toLowerCase() || '.jpg'
-      const path = `media/gallery/${slugify(n.title) || `night-${Date.now()}`}${ext}`
-      const contentBase64 = await fileToBase64(file)
+      const path = `media/gallery/${slugify(n.title) || `night-${Date.now()}`}.jpg`
+      const contentBase64 = await fileToBase64(blob)
       const res = await fetch('/api/upload-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -492,13 +500,23 @@ function NightFields({ n, onChange, onRemove, creds }) {
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                onChange={handlePosterUpload}
+                onChange={pickFile}
                 disabled={uploading}
                 className="hidden"
               />
             </label>
           </div>
           {uploadError && <p className="mt-1 text-[10px] text-flare">{uploadError}</p>}
+          {pendingFile && (
+            <ImageCropDialog
+              file={pendingFile}
+              defaultAspect={SPAN_ASPECT[n.span] || SPAN_ASPECT.normal}
+              confirmLabel="Crop & upload"
+              busy={uploading}
+              onCancel={() => setPendingFile(null)}
+              onConfirm={uploadCropped}
+            />
+          )}
         </Field>
         <Field label="YouTube link — paste the full URL or just the ID">
           <input
@@ -721,7 +739,10 @@ function ImageUploader({ creds, onAddGalleryItem }) {
   const [target, setTarget] = useState(TARGETS[0].value)
   const [filename, setFilename] = useState('')
   const [customPath, setCustomPath] = useState('')
-  const [file, setFile] = useState(null)
+  const [pendingFile, setPendingFile] = useState(null) // raw pick, awaiting crop
+  const [file, setFile] = useState(null) // ready to upload — cropped Blob, or raw File for video/custom
+  const [wasCropped, setWasCropped] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
@@ -731,8 +752,19 @@ function ImageUploader({ creds, onAddGalleryItem }) {
   const needsFilename = target === 'gallery-photo' || target === 'gallery-video'
   const isGallery = needsFilename
   const defaultExt = selected.kind === 'video' ? '.mp4' : '.jpg'
-  const ext =
-    file?.name.match(/\.(jpe?g|png|webp|mp4|mov|webm)$/i)?.[0]?.toLowerCase() || defaultExt
+  const ext = wasCropped
+    ? '.jpg'
+    : file?.name?.match(/\.(jpe?g|png|webp|mp4|mov|webm)$/i)?.[0]?.toLowerCase() || defaultExt
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl('')
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
 
   const resolvedPath = (() => {
     if (target === 'custom') return customPath.replace(/^\/+/, '')
@@ -800,6 +832,9 @@ function ImageUploader({ creds, onAddGalleryItem }) {
               setTarget(e.target.value)
               setResult(null)
               setAdded(false)
+              setFile(null)
+              setPendingFile(null)
+              setWasCropped(false)
             }}
             className="w-full border border-silver/15 bg-void-000 px-3 py-2.5 font-mono text-[12px] text-silver-hi outline-none transition-colors focus:border-flare"
           >
@@ -866,13 +901,44 @@ function ImageUploader({ creds, onAddGalleryItem }) {
                   : 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm'
             }
             onChange={(e) => {
-              setFile(e.target.files?.[0] || null)
+              const picked = e.target.files?.[0] || null
+              e.target.value = ''
               setResult(null)
               setAdded(false)
+              setError('')
+              if (!picked) return
+              if (selected.kind === 'image') {
+                setPendingFile(picked) // opens the crop dialog below
+              } else {
+                setFile(picked)
+                setWasCropped(false)
+              }
             }}
             className="w-full border border-silver/15 bg-void-000 px-3 py-2.5 font-mono text-[12px] text-silver-hi outline-none file:mr-3 file:border-0 file:bg-flare file:px-3 file:py-1.5 file:font-mono file:text-[10px] file:uppercase file:tracking-widest2 file:text-void-000"
           />
         </div>
+
+        {pendingFile && (
+          <ImageCropDialog
+            file={pendingFile}
+            defaultAspect={4 / 3}
+            confirmLabel="Crop & continue"
+            onCancel={() => setPendingFile(null)}
+            onConfirm={(blob) => {
+              setFile(blob)
+              setWasCropped(true)
+              setPendingFile(null)
+            }}
+          />
+        )}
+
+        {previewUrl && (
+          <img
+            src={previewUrl}
+            alt="Selected photo preview"
+            className="h-36 w-full border border-silver/15 object-cover"
+          />
+        )}
 
         {resolvedPath && (
           <p className="font-mono text-[10px] text-silver-lo">
