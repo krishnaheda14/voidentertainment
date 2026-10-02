@@ -418,18 +418,27 @@ function NightFields({ n, onChange, onRemove, creds }) {
   const set = (k) => (e) => onChange({ [k]: e.target.value })
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [uploaded, setUploaded] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
   const [pendingFile, setPendingFile] = useState(null)
+  const uploadTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(uploadTimer.current), [])
+  useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl])
 
   const pickFile = (e) => {
     const file = e.target.files?.[0]
     e.target.value = '' // lets the same file be re-picked later if needed
     if (!file) return
     setUploadError('')
+    setUploaded(false)
     setPendingFile(file)
   }
 
   const uploadCropped = async (blob) => {
     setPendingFile(null)
+    setUploadError('')
+    setUploaded(false)
     const credsProblem = credsError(creds)
     if (credsProblem) {
       setUploadError(credsProblem)
@@ -447,6 +456,14 @@ function NightFields({ n, onChange, onRemove, creds }) {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`)
       onChange({ poster: data.path })
+      // Preview from the blob we just sent, not the live path — the path
+      // won't actually resolve on the site until the redeploy finishes a
+      // minute or two from now, so this is what confirms "it worked" in
+      // the moment rather than looking like a broken image meanwhile.
+      setPreviewUrl(URL.createObjectURL(blob))
+      setUploaded(true)
+      clearTimeout(uploadTimer.current)
+      uploadTimer.current = setTimeout(() => setUploaded(false), 5000)
     } catch (err) {
       setUploadError(err.message || 'Failed to upload.')
     } finally {
@@ -506,7 +523,20 @@ function NightFields({ n, onChange, onRemove, creds }) {
               />
             </label>
           </div>
+          {uploading && (
+            <p className="mt-1 flex items-center gap-1 text-[10px] text-silver-mid">
+              <UploadCloud size={11} className="animate-pulse" /> Uploading…
+            </p>
+          )}
           {uploadError && <p className="mt-1 text-[10px] text-flare">{uploadError}</p>}
+          {uploaded && !uploadError && previewUrl && (
+            <div className="mt-1.5 flex items-center gap-2">
+              <img src={previewUrl} alt="" className="h-10 w-10 border border-silver/15 object-cover" />
+              <p className="flex items-center gap-1 text-[10px] text-emerald-400">
+                <Check size={11} /> Uploaded — live on the site in a minute or two.
+              </p>
+            </div>
+          )}
           {pendingFile && (
             <ImageCropDialog
               file={pendingFile}
