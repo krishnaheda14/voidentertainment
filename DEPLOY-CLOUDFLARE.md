@@ -116,16 +116,18 @@ Good if you would rather not use Git. You must run these commands from your own 
 cd void-entertainment
 npx wrangler login          # opens a browser, click Allow
 npm run build
-npx wrangler pages deploy dist --project-name=void-entertainment
+npx wrangler pages deploy dist --project-name=YOUR-PROJECT-NAME
 ```
 
-First run asks you to create the project and pick a production branch — type `main`.
+First run asks you to create the project and pick a production branch — type `main`. Whatever name you give it there is final — Cloudflare Pages doesn't let you rename a project's deploy target later, so if you want it to match this guide exactly, type `void-entertainment`.
 
 After that, one command publishes:
 
 ```bash
 npm run deploy              # this is the build + deploy shortcut, already in package.json
 ```
+
+`wrangler.toml` and `package.json`'s `deploy`/`cf:tail` scripts already declare the project name — update both if yours differs from the default. **This specific project's live Cloudflare Pages project is named `voidentertainmentmumbai`** (not `void-entertainment`) — that's what every script and workflow in this repo currently points at.
 
 `wrangler.toml` in the project root already declares `pages_build_output_dir = "dist"`.
 
@@ -187,7 +189,7 @@ Propagation usually takes 5–30 minutes and occasionally up to 24 hours. Cloudf
 
 ## B3. Attach the domain to your site
 
-1. **Workers & Pages** → click your **void-entertainment** project
+1. **Workers & Pages** → click your Pages project (`void-entertainment` in this guide — check your actual project name if you renamed it or Cloudflare picked a different one for you)
 2. **Custom domains** tab
 3. **Set up a custom domain**
 4. Enter your apex domain — `voidentertainment.in`, with no `www` and no `https://`

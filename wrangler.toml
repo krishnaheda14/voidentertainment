@@ -9,7 +9,7 @@
 # admin panel's live-publish and view-count functions read from
 # (functions/api/*.js) — see ADMIN-SETUP.md.
 
-name = "void-entertainment"
+name = "voidentertainmentmumbai"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "dist"
 
