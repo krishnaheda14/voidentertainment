@@ -20,6 +20,19 @@ import { VoidButton } from './ui'
 import { cx } from '../lib/utils'
 import logo from '../data/logo-mark.png'
 
+/* If this ever fires, `creds` went missing despite the UI showing the
+   editor — it means this tab is running an older build than the one on
+   the server (the fix for that exact symptom shipped 2026-10-02; a tab
+   left open since before a deploy keeps running the old JS until it's
+   reloaded, since a SPA doesn't hot-swap itself). Surfacing this
+   specific message, instead of letting it fall through to the server's
+   generic "Missing id or password", makes a stale tab/stale credentials
+   obviously different from every other failure mode at a glance. */
+function credsError(creds) {
+  if (creds && typeof creds.id === 'string' && typeof creds.password === 'string') return null
+  return 'Not logged in in this tab (or it’s running an old version of the page) — reload /admin and log in again.'
+}
+
 const DAY_CODES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const DAY_LONG = {
   Mon: 'Monday',
@@ -221,12 +234,14 @@ function EditPage({ creds, onLogout }) {
     <div className="grid gap-8 lg:grid-cols-[1.3fr,1fr]">
       <ContentEditor data={data} setData={setData} creds={creds} />
       <ImageUploader creds={creds} onAddGalleryItem={addGalleryItem} />
-      <button
-        onClick={onLogout}
-        className="font-mono text-[10px] uppercase tracking-widest2 text-silver-lo transition-colors hover:text-flare lg:col-span-2"
-      >
-        Log out
-      </button>
+      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest2 lg:col-span-2">
+        <span className={creds?.id ? 'text-silver-lo' : 'text-flare'}>
+          {creds?.id ? `Logged in as ${creds.id}` : 'Not logged in — reload this page'}
+        </span>
+        <button onClick={onLogout} className="text-silver-lo transition-colors hover:text-flare">
+          Log out
+        </button>
+      </div>
     </div>
   )
 }
@@ -406,6 +421,11 @@ function NightFields({ n, onChange, onRemove, creds }) {
     e.target.value = '' // lets the same file be re-picked later if needed
     if (!file) return
     setUploadError('')
+    const credsProblem = credsError(creds)
+    if (credsProblem) {
+      setUploadError(credsProblem)
+      return
+    }
     setUploading(true)
     try {
       const ext = file.name.match(/\.(jpe?g|png|webp)$/i)?.[0]?.toLowerCase() || '.jpg'
@@ -575,6 +595,11 @@ function ContentEditor({ data, setData, creds }) {
   const publish = async () => {
     const payload = buildPayload()
     if (!validate(payload)) return
+    const credsProblem = credsError(creds)
+    if (credsProblem) {
+      setError(credsProblem)
+      return
+    }
 
     saveOverrides(payload)
     notifyDataChanged()
@@ -728,6 +753,11 @@ function ImageUploader({ creds, onAddGalleryItem }) {
     }
     if (!resolvedPath) {
       setError(needsFilename ? 'Give it a file name.' : 'Give it a path.')
+      return
+    }
+    const credsProblem = credsError(creds)
+    if (credsProblem) {
+      setError(credsProblem)
       return
     }
     setBusy(true)
